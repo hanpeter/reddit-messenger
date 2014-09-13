@@ -1,0 +1,4 @@
+*.sublime-project
+*.sublime-workspace
+/libraries/angularjs/docs
+/libraries/angularjs/i18n
