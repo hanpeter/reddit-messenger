@@ -1,14 +1,19 @@
 {
     "name": "Reddit Messenger",
-    "version": "0.1",
+    "version": "0.0.0.1",
     "manifest_version": 2,
     "description": "TODO",
     "permissions": [
-        "storage"
+        "storage", "identity"
     ],
     "app": {
         "background": {
             "scripts": ["background.js"]
         }
+    },
+    "icons": {
+        "16": "assets/icon_16.png",
+        "48": "assets/icon_48.png",
+        "128": "assets/icon_128.png"
     }
 }
