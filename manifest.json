@@ -1,0 +1,17 @@
+{
+    "name": "Reddit Messenger",
+    "version": "0.1",
+    "manifest_version": 2,
+    "description": "TODO",
+    "permissions": [
+        "storage"
+    ],
+    "web_accessible_resources": [
+        "/templates/*"
+    ],
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    }
+}
