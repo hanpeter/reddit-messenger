@@ -6,7 +6,7 @@
     "permissions": [
         "storage", "identity",
         "https://ssl.reddit.com/",
-        "https://www.reddit.com/"
+        "https://oauth.reddit.com/"
     ],
     "app": {
         "background": {

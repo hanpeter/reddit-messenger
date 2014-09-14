@@ -1,5 +1,6 @@
 App.service('RedditService', [function () {
-    var me = this;
+    var me = this,
+        redirectUri = 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb';
 
     function generateURL(baseUrl, params) {
         return baseUrl + '?' + _.reduce(_.map(params, function (value, key) { return key + '=' + value; }), function (memo, value) { return memo + '&' + value; });
@@ -30,9 +31,9 @@ App.service('RedditService', [function () {
                     client_id: '_OiiEDnIKbwbOg',
                     response_type: 'code',
                     state: state,
-                    redirect_uri: encodeURIComponent('https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'),
+                    redirect_uri: encodeURIComponent(redirectUri),
                     duration: 'permanent',
-                    scope: 'privatemessages'
+                    scope: 'privatemessages,identity'
                 },
                 options = {
                     interactive: true,
@@ -40,14 +41,14 @@ App.service('RedditService', [function () {
                 }
                 promise = $.Deferred();
 
-            chrome.identity.launchWebAuthFlow(options, function (redirectUri) {
-                if (!redirectUri) {
-                    promise.reject('Invalid redirectUri', redirectUri);
+            chrome.identity.launchWebAuthFlow(options, function (rUri) {
+                if (!rUri) {
+                    promise.reject('Invalid redirectUri', rUri);
                 }
 
-                var parser = $('<a></a>').attr('href', redirectUri)[0],
+                var parser = $('<a></a>').attr('href', rUri)[0],
                     query = parseQueryString(parser.search.substr(1));
-                
+
                 if (chrome.runtime.lastError) {
                     promise.reject(chrome.runtime.lastError);
                 }
@@ -56,12 +57,61 @@ App.service('RedditService', [function () {
                     promise.reject('Invalid state');
                 }
 
-                me.token = query.code;
+                if (!query.code) {
+                    promise.reject('Invalid code');
+                }
 
-                promise.resolve(me.token);
+                $.ajax({
+                    url: 'https://ssl.reddit.com/api/v1/access_token',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+                    headers: {
+                        Authorization: 'Basic ' + window.btoa('_OiiEDnIKbwbOg' + ':' + 'QnJs4dIkJeVKCdo-kGQImw2ftlA')
+                    },
+                    data: {
+                        'grant_type': 'authorization_code',
+                        code: query.code,
+                        'redirect_uri': redirectUri
+                    }
+                }).done(function (data) {
+                    me.accessToken = data.access_token;
+                    me.refreshToken = data.refresh_token;
+                    promise.resolve(data);
+                });
             });
 
             return promise;
+        },
+        getMessages: function () {
+            return $.ajax({
+                url: 'https://oauth.reddit.com/message/inbox',
+                type: 'GET',
+                dataType: 'JSON',
+                contentType: 'application/json',
+                headers: {
+                    Authorization: 'bearer ' + me.accessToken
+                },
+                data: {
+                    mark: false,
+                    limit: 100
+                }
+            });
+        },
+        getUnreadMessages: function () {
+            return $.ajax({
+                url: 'https://oauth.reddit.com/message/unread',
+                type: 'GET',
+                dataType: 'JSON',
+                contentType: 'application/json',
+                headers: {
+                    Authorization: 'bearer ' + me.accessToken
+                },
+                data: {
+                    mark: false,
+                    limit: 100
+                }
+            });
         }
     });
 }]);
