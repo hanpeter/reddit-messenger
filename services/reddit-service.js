@@ -74,7 +74,7 @@ App.service('RedditService', [function () {
                         code: query.code,
                         'redirect_uri': redirectUri
                     }
-                }).done(function (data) {
+                }).then(function (data) {
                     me.accessToken = data.access_token;
                     me.refreshToken = data.refresh_token;
                     promise.resolve(data);
@@ -94,8 +94,10 @@ App.service('RedditService', [function () {
                 },
                 data: {
                     mark: false,
-                    limit: 100
+                    limit: 25
                 }
+            }).then(function (data) {
+                return data.data;
             });
         },
         getUnreadMessages: function () {
@@ -109,8 +111,10 @@ App.service('RedditService', [function () {
                 },
                 data: {
                     mark: false,
-                    limit: 100
+                    limit: 25
                 }
+            }).then(function (data) {
+                return data.data;
             });
         }
     });
