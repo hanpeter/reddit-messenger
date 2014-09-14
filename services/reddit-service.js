@@ -94,7 +94,7 @@ App.service('RedditService', [function () {
                 },
                 data: {
                     mark: false,
-                    limit: 25
+                    limit: 100
                 }
             }).then(function (data) {
                 return data.data;

@@ -1,5 +1,5 @@
 <div class="list-template">
-    <table class="table table-hover table-striped">
+    <table class="table table-hover table-striped" ng-repeat="thread in messages">
         <thead>
             <tr>
                 <th>ID</th>
@@ -9,7 +9,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="msg in messages" ng-class="{ info: msg.isNew }">
+            <tr ng-repeat="msg in thread.messages" ng-class="{ info: msg.isNew }">
                 <td>{{msg.id}}</td>
                 <td>{{msg.author}}</td>
                 <td ng-bind-html="msg.body"></td>
