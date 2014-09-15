@@ -4,9 +4,9 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
                 id: message.id,
                 author: message.author,
                 body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
-                createDate: new Date(message.created_utc* 1000),
+                createDate: moment(message.created_utc* 1000),
                 isUnread: message.new,
-                isSent: message.dest === RedditService.userName
+                isReceived: message.dest === RedditService.userName
             },
             thread = _.find(messages, function (m) { return m.threadID === message.first_message; });
 
@@ -27,11 +27,11 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
 
     function sortMessages(messages) {
         _.each(messages, function (thread) {
-            thread.messages = _.sortBy(thread.messages, function (msg) { return msg.createDate.getTime() * -1; });
+            thread.messages = _.sortBy(thread.messages, function (msg) { return msg.createDate.unix() * -1; });
         });
 
         return _.sortBy(messages, function (thread) {
-            return thread.messages[0].createDate.getTime() * -1;
+            return thread.messages[0].createDate.unix() * -1;
         });
     }
 
@@ -40,6 +40,19 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
         activeThread: null,
         setActiveThread: function (thread) {
             $scope.activeThread = thread;
+        },
+        displayDate: function (momentDate) {
+            var currentTime = moment();
+
+            if (currentTime.year() !== momentDate.year()) {
+                return momentDate.format('YYYY-MM-DD HH:mm:ss');
+            }
+            else if (currentTime.dayOfYear() !== momentDate.dayOfYear()) {
+                return momentDate.format('MM-DD HH:mm:ss');
+            }
+            else {
+                return momentDate.format('HH:mm:ss');
+            }
         }
     });
 
@@ -58,6 +71,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
                 messages = sortMessages(messages);
                 $scope.sync(function () {
                     $scope.messages = messages;
+                    console.log($scope.messages);
                 });
             });
 

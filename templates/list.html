@@ -1,28 +1,19 @@
 <div class="list-template">
-    <ul class="nav nav-pills nav-stacked">
-        <li ng-repeat="thread in messages">
-            <a  ng-href="" ng-click="setActiveThread(thread)">
+    <ul class="nav nav-pills nav-stacked col-xs-3">
+        <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
+            <a ng-href="" ng-click="setActiveThread(thread)">
                 <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
-                {{thread.subject}} with {{thread.dest}}
+                <h4>{{thread.subject}}</h4>
+                with {{thread.dest}}
             </a>
         </li>
     </ul>
-    <table class="table" ng-show="activeThread !== null">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Author</th>
-                <th>Body</th>
-                <th>Thread ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="msg in activeThread.messages" ng-class="{ active: msg.isSent, info: msg.isNew }">
-                <td>{{msg.id}}</td>
-                <td>{{msg.author}}</td>
-                <td ng-bind-html="msg.body"></td>
-                <td>{{msg.firstMessageID}}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="col-xs-9">
+        <div class="media" ng-repeat="msg in activeThread.messages">
+            <div class="media-body" ng-class="{ 'bg-info': msg.isReceived }">
+                <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>
+                <div ng-bind-html="msg.body"></div>
+            </div>
+        </div>
+    </div>
 </div>
