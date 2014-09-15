@@ -25,6 +25,7 @@ App.service('RedditService', [function () {
     }
 
     _.extend(me, {
+        userName: 'dppsub2',
         getToken: function () {
             var state = randomStateGenerator(20),
                 params = {
@@ -70,9 +71,9 @@ App.service('RedditService', [function () {
                         Authorization: 'Basic ' + window.btoa('_OiiEDnIKbwbOg' + ':' + 'QnJs4dIkJeVKCdo-kGQImw2ftlA')
                     },
                     data: {
-                        'grant_type': 'authorization_code',
+                        grant_type: 'authorization_code',
                         code: query.code,
-                        'redirect_uri': redirectUri
+                        redirect_uri: redirectUri
                     }
                 }).then(function (data) {
                     me.accessToken = data.access_token;
@@ -83,7 +84,7 @@ App.service('RedditService', [function () {
 
             return promise;
         },
-        getMessages: function () {
+        getInboxMessages: function () {
             return $.ajax({
                 url: 'https://oauth.reddit.com/message/inbox',
                 type: 'GET',
@@ -94,7 +95,7 @@ App.service('RedditService', [function () {
                 },
                 data: {
                     mark: false,
-                    limit: 100
+                    limit: 25
                 }
             }).then(function (data) {
                 return data.data;
@@ -103,6 +104,23 @@ App.service('RedditService', [function () {
         getUnreadMessages: function () {
             return $.ajax({
                 url: 'https://oauth.reddit.com/message/unread',
+                type: 'GET',
+                dataType: 'JSON',
+                contentType: 'application/json',
+                headers: {
+                    Authorization: 'bearer ' + me.accessToken
+                },
+                data: {
+                    mark: false,
+                    limit: 25
+                }
+            }).then(function (data) {
+                return data.data;
+            });
+        },
+        getSentMessages: function () {
+            return $.ajax({
+                url: 'https://oauth.reddit.com/message/sent',
                 type: 'GET',
                 dataType: 'JSON',
                 contentType: 'application/json',

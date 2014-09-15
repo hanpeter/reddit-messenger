@@ -5,18 +5,23 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
                 author: message.author,
                 body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
                 createDate: new Date(message.created_utc* 1000),
-                isUnread: message.new
+                isUnread: message.new,
+                isSent: message.dest === RedditService.userName
             },
             thread = _.find(messages, function (m) { return m.threadID === message.first_message; });
 
         if (!thread) {
             thread = {
                 threadID: message.first_message,
-                messages: []
+                subject: message.subject,
+                dest: message.author === RedditService.userName ? message.dest : message.author,
+                messages: [],
+                unreadCount: 0
             };
             messages.push(thread);
         }
 
+        thread.unreadCount += (msg.isUnread) ? 1 : 0;
         thread.messages.push(msg);
     }
 
@@ -31,23 +36,28 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
     }
 
     _.extend($scope, {
-        messages: []
+        messages: [],
+        activeThread: null,
+        setActiveThread: function (thread) {
+            $scope.activeThread = thread;
+        }
     });
 
     RedditService.getToken()
         .done(function (data) {
-            RedditService.getMessages().done(function (data) {
+            $.when(
+                RedditService.getInboxMessages(),
+                RedditService.getSentMessages()
+            ).done(function (inbox, sent) {
                 var messages = [];
 
-                console.log(data.children);
-                _.each(_.pluck(data.children, 'data'), function (value) {
+                _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
                     addMessage(messages, value);
                 });
-                
+
                 messages = sortMessages(messages);
                 $scope.sync(function () {
                     $scope.messages = messages;
-                    console.log(messages);
                 });
             });
 

@@ -1,5 +1,13 @@
 <div class="list-template">
-    <table class="table table-hover table-striped" ng-repeat="thread in messages">
+    <ul class="nav nav-pills nav-stacked">
+        <li ng-repeat="thread in messages">
+            <a  ng-href="" ng-click="setActiveThread(thread)">
+                <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
+                {{thread.subject}} with {{thread.dest}}
+            </a>
+        </li>
+    </ul>
+    <table class="table" ng-show="activeThread !== null">
         <thead>
             <tr>
                 <th>ID</th>
@@ -9,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="msg in thread.messages" ng-class="{ info: msg.isNew }">
+            <tr ng-repeat="msg in activeThread.messages" ng-class="{ active: msg.isSent, info: msg.isNew }">
                 <td>{{msg.id}}</td>
                 <td>{{msg.author}}</td>
                 <td ng-bind-html="msg.body"></td>
