@@ -24,65 +24,96 @@ App.service('RedditService', [function () {
         return _.reduce(map, function (memo, value) { return _.extend(memo, value); });
     }
 
+    function getOAuthToken() {
+        var state = randomStateGenerator(20),
+            params = {
+                client_id: '_OiiEDnIKbwbOg',
+                response_type: 'code',
+                state: state,
+                redirect_uri: encodeURIComponent(redirectUri),
+                duration: 'permanent',
+                scope: 'privatemessages,identity'
+            },
+            options = {
+                interactive: true,
+                url: generateURL('https://ssl.reddit.com/api/v1/authorize', params)
+            }
+            promise = $.Deferred();
+
+        chrome.identity.launchWebAuthFlow(options, function (rUri) {
+            if (!rUri) {
+                promise.reject('Invalid redirectUri', rUri);
+            }
+
+            var parser = $('<a></a>').attr('href', rUri)[0],
+                query = parseQueryString(parser.search.substr(1));
+
+            if (chrome.runtime.lastError) {
+                promise.reject(chrome.runtime.lastError);
+            }
+
+            if (query.state !== state) {
+                promise.reject('Invalid state');
+            }
+
+            if (!query.code) {
+                promise.reject('Invalid code');
+            }
+
+            promise.resolve(query.code);
+        });
+
+        return promise;
+    }
+
+    function getAccessToken(oauthCode) {
+        return $.ajax({
+            url: 'https://ssl.reddit.com/api/v1/access_token',
+            type: 'POST',
+            dataType: 'JSON',
+            contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+            headers: {
+                Authorization: 'Basic ' + window.btoa('_OiiEDnIKbwbOg' + ':' + 'QnJs4dIkJeVKCdo-kGQImw2ftlA')
+            },
+            data: {
+                grant_type: 'authorization_code',
+                code: oauthCode,
+                redirect_uri: redirectUri
+            }
+        }).then(function (data) {
+            me.accessToken = data.access_token;
+            me.refreshToken = data.refresh_token;
+
+            return data.expires_in * 1000;
+        });
+    }
+
+    function refreshAccessToken() {
+        return $.ajax({
+            url: 'https://ssl.reddit.com/api/v1/access_token',
+            type: 'POST',
+            dataType: 'JSON',
+            contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+            headers: {
+                Authorization: 'Basic ' + window.btoa('_OiiEDnIKbwbOg' + ':' + 'QnJs4dIkJeVKCdo-kGQImw2ftlA')
+            },
+            data: {
+                grant_type: 'refresh_token',
+                refresh_token: me.refreshToken
+            }
+        }).then(function (data) {
+            me.accessToken = data.access_token;
+
+            setTimeout(refreshAccessToken, data.expires_in * 1000);
+        });
+    }
+
     _.extend(me, {
         userName: 'dppsub2',
         getToken: function () {
-            var state = randomStateGenerator(20),
-                params = {
-                    client_id: '_OiiEDnIKbwbOg',
-                    response_type: 'code',
-                    state: state,
-                    redirect_uri: encodeURIComponent(redirectUri),
-                    duration: 'permanent',
-                    scope: 'privatemessages,identity'
-                },
-                options = {
-                    interactive: true,
-                    url: generateURL('https://ssl.reddit.com/api/v1/authorize', params)
-                }
-                promise = $.Deferred();
-
-            chrome.identity.launchWebAuthFlow(options, function (rUri) {
-                if (!rUri) {
-                    promise.reject('Invalid redirectUri', rUri);
-                }
-
-                var parser = $('<a></a>').attr('href', rUri)[0],
-                    query = parseQueryString(parser.search.substr(1));
-
-                if (chrome.runtime.lastError) {
-                    promise.reject(chrome.runtime.lastError);
-                }
-
-                if (query.state !== state) {
-                    promise.reject('Invalid state');
-                }
-
-                if (!query.code) {
-                    promise.reject('Invalid code');
-                }
-
-                $.ajax({
-                    url: 'https://ssl.reddit.com/api/v1/access_token',
-                    type: 'POST',
-                    dataType: 'JSON',
-                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
-                    headers: {
-                        Authorization: 'Basic ' + window.btoa('_OiiEDnIKbwbOg' + ':' + 'QnJs4dIkJeVKCdo-kGQImw2ftlA')
-                    },
-                    data: {
-                        grant_type: 'authorization_code',
-                        code: query.code,
-                        redirect_uri: redirectUri
-                    }
-                }).then(function (data) {
-                    me.accessToken = data.access_token;
-                    me.refreshToken = data.refresh_token;
-                    promise.resolve(data);
-                });
+            return getOAuthToken().then(getAccessToken).done(function (expirationTime) {
+                setTimeout(refreshAccessToken, expirationTime);
             });
-
-            return promise;
         },
         getInboxMessages: function () {
             return $.ajax({
