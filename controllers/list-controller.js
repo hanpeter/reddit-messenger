@@ -114,7 +114,6 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
         ).done(function (inbox, sent) {
             var messages = [];
 
-            console.log(sent.children);
             _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
                 addMessage(messages, value);
             });
@@ -150,7 +149,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
                                     notificationID = '';
                                 });
                             }, NOTIFICATION_BUFFER);
-                        });   
+                        });
                     }
                     else {
                         chrome.notifications.update(notificationID, notiConfig, $.noop);
@@ -168,7 +167,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
     }
 
     RedditService.getToken()
-        .done(function (data) {
+        .done(function () {
             updateMessages()
             setInterval(updateMessages, 30000);
 

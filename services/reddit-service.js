@@ -124,8 +124,9 @@ App.constant('RedditConfig', {
 
         _.extend(me, {
             getToken: function () {
-                return getOAuthToken().then(getAccessToken)
-                    .done(function (expirationTime) {
+                return getOAuthToken()
+                    .then(getAccessToken)
+                    .then(function (expirationTime) {
                         setTimeout(refreshAccessToken, expirationTime);
                         getUserInfo();
                     });
