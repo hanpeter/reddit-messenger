@@ -59,23 +59,30 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
         }
     });
 
+    function updateMessages() {
+        var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
+        $.when(
+            RedditService.getInboxMessages(100),
+            RedditService.getSentMessages(100)
+        ).done(function (inbox, sent) {
+            var messages = [];
+
+            _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
+                addMessage(messages, value);
+            });
+
+            messages = sortMessages(messages);
+            $scope.sync(function () {
+                $scope.messages = messages;
+                $scope.activeThread = _.find($scope.messages, function (thread) { return thread.threadID === activeThreadID; });
+            });
+        });
+    }
+
     RedditService.getToken()
         .done(function (data) {
-            $.when(
-                RedditService.getInboxMessages(),
-                RedditService.getSentMessages()
-            ).done(function (inbox, sent) {
-                var messages = [];
-
-                _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
-                    addMessage(messages, value);
-                });
-
-                messages = sortMessages(messages);
-                $scope.sync(function () {
-                    $scope.messages = messages;
-                });
-            });
+            updateMessages()
+            setInterval(updateMessages, 30000);
 
             setInterval(function () {
                 RedditService.getUnreadMessages()

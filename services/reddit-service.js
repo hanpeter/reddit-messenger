@@ -136,7 +136,7 @@ App.constant('RedditConfig', {
                         getUserInfo();
                     });
             },
-            getInboxMessages: function () {
+            getInboxMessages: function (count) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/inbox',
                     type: 'GET',
@@ -147,13 +147,13 @@ App.constant('RedditConfig', {
                     },
                     data: {
                         mark: false,
-                        limit: 25
+                        limit: count || 25
                     }
                 }).then(function (data) {
                     return data.data;
                 });
             },
-            getUnreadMessages: function () {
+            getUnreadMessages: function (count) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/unread',
                     type: 'GET',
@@ -164,13 +164,13 @@ App.constant('RedditConfig', {
                     },
                     data: {
                         mark: false,
-                        limit: 25
+                        limit: count || 25
                     }
                 }).then(function (data) {
                     return data.data;
                 });
             },
-            getSentMessages: function () {
+            getSentMessages: function (count) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/sent',
                     type: 'GET',
@@ -181,7 +181,7 @@ App.constant('RedditConfig', {
                     },
                     data: {
                         mark: false,
-                        limit: 25
+                        limit: count || 25
                     }
                 }).then(function (data) {
                     return data.data;
