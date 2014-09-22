@@ -3,19 +3,22 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
         NOTIFICATION_BUFFER = 15000;
 
     function addMessage(messages, message) {
-        var msg = {
+        var bodyHtml = $('<textarea/>').html(message.body_html).text(),
+            msg = {
                 id: message.name,
                 author: message.author,
-                body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
+                body: $sce.trustAsHtml(bodyHtml),
                 createDate: moment(message.created_utc* 1000),
                 isUnread: message.new,
                 isReceived: message.dest === RedditConfig.username
             },
-            thread = _.find(messages, function (m) { return m.threadID === message.first_message_name; });
+            thread = _.find(messages, function (thread) {
+                return !!message.first_message_name ? thread.threadID === message.first_message_name : thread.threadID === message.name;
+            });
 
         if (!thread) {
             thread = {
-                threadID: message.first_message_name,
+                threadID: message.first_message_name || message.name,
                 subject: message.subject,
                 dest: message.author === RedditConfig.username ? message.dest : message.author,
                 messages: [],
@@ -111,6 +114,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
         ).done(function (inbox, sent) {
             var messages = [];
 
+            console.log(sent.children);
             _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
                 addMessage(messages, value);
             });
@@ -166,7 +170,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
     RedditService.getToken()
         .done(function (data) {
             updateMessages()
-            setInterval(updateMessages, 30000);
+            //setInterval(updateMessages, 30000);
 
             setInterval(checkUnreadMessages, 5000);
         });
