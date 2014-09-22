@@ -9,6 +9,14 @@
         </li>
     </ul>
     <div class="col-xs-9">
+        <form role="form" ng-show="!!activeThread">
+            <div class="form-group">
+                <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
+            </div>
+            <div class="clearfix">
+                <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">Send</button>
+            </div>
+        </form>
         <div class="media" ng-repeat="msg in activeThread.messages">
             <div class="media-body" ng-class="{ 'bg-primary': msg.isUnread && msg.isReceived, 'bg-info': !msg.isUnread && msg.isReceived }" ng-click="markAsRead(msg)">
                 <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>

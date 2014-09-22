@@ -1,4 +1,7 @@
 App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConfig', function ($scope, $sce, RedditService, RedditConfig) {
+    var notificationID = '',
+        NOTIFICATION_BUFFER = 15000;
+
     function addMessage(messages, message) {
         var msg = {
                 id: message.name,
@@ -40,7 +43,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
     _.extend($scope, {
         messages: [],
         activeThread: null,
-        notificationID: '',
+        replyMsg: '',
         setActiveThread: function (thread) {
             $scope.activeThread = thread;
         },
@@ -57,30 +60,51 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
                 return momentDate.format('HH:mm:ss');
             }
         },
-        markAsRead: function (msg) {
-            if (!msg.isReceived) {
+        markAsRead: function (message) {
+            if (!message.isReceived) {
                 return;
             }
 
-            if (msg.isUnread) {
-                RedditService.markMessageAsRead(msg.id);
-                msg.isUnread = false;
+            if (message.isUnread) {
+                RedditService.markMessageAsRead(message.id);
+                message.isUnread = false;
 
                 if ($scope.activeThread.unreadCount > 0) {
                     $scope.activeThread.unreadCount--;
                 }
             }
             else {
-                RedditService.markMessageAsUnread(msg.id);
-                msg.isUnread = true;
+                RedditService.markMessageAsUnread(message.id);
+                message.isUnread = true;
 
                 $scope.activeThread.unreadCount++;
             }
+        },
+        reply: function () {
+            var replyTo = _.find($scope.activeThread.messages, function (msg) { return msg.isReceived; });
+
+            if (!replyTo) {
+                return;
+            }
+
+            RedditService.postReplyMessage(replyTo.id, $scope.replyMsg)
+                .done(function (messages) {
+                    $scope.sync(function () {
+                        $scope.replyMsg = '';
+
+                        _.each(_.pluck(messages, 'data'), function (value) {
+                            addMessage($scope.messages, value);
+                        });
+
+                        $scope.messages = sortMessages($scope.messages);
+                    });
+                });
         }
     });
 
     function updateMessages() {
         var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
+
         $.when(
             RedditService.getInboxMessages(100),
             RedditService.getSentMessages(100)
@@ -99,39 +123,51 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
         });
     }
 
+    function checkUnreadMessages() {
+        var notiConfig = {
+            type: "basic",
+            iconUrl: "/assets/icon_128.png",
+            title: "Unread message(s) for " + RedditConfig.username
+        };
+
+        RedditService.getUnreadMessages()
+            .done(function (data) {
+                if (data.children.length > 0) {
+                    _.extend(notiConfig, {
+                        message: "There is " + data.children.length + " unread messages."
+                    });
+
+                    if (!notificationID) {
+                        chrome.notifications.create('', notiConfig, function (nID) {
+                            notificationID = nID;
+
+                            setTimeout(function () {
+                                chrome.notifications.clear(notificationID, function () {
+                                    notificationID = '';
+                                });
+                            }, NOTIFICATION_BUFFER);
+                        });   
+                    }
+                    else {
+                        chrome.notifications.update(notificationID, notiConfig, $.noop);
+                    }
+
+                    $scope.sync(function () {
+                        _.each(_.pluck(data.children, 'data'), function (value) {
+                            addMessage($scope.messages, value);
+                        });
+
+                        $scope.messages = sortMessages($scope.messages);
+                    });
+                }
+            });
+    }
+
     RedditService.getToken()
         .done(function (data) {
             updateMessages()
             setInterval(updateMessages, 30000);
 
-            setInterval(function () {
-                RedditService.getUnreadMessages()
-                    .done(function (data) {
-                        if (data.children.length > 0) {
-                            if (!!$scope.notificationID) {
-                                chrome.notifications.clear($scope.notificationID, $.noop);
-                            }
-
-                            chrome.notifications.create('', {
-                                type: "basic",
-                                iconUrl: "/assets/icon_128.png",
-                                title: "Unread Message for " + RedditConfig.username,
-                                message: "There is " + data.children.length + " unread messages."
-                            }, function (notificationID) {
-                                $scope.sync(function () {
-                                    $scope.notificationID = notificationID;
-                                });
-                            });
-
-                            $scope.sync(function () {
-                                _.each(_.pluck(data.children, 'data'), function (value) {
-                                    addMessage($scope.messages, value);
-                                });
-
-                                $scope.messages = sortMessages($scope.messages);
-                            });
-                        }
-                    });
-            }, 5000);
+            setInterval(checkUnreadMessages, 5000);
         });
 }]);

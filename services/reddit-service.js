@@ -37,7 +37,7 @@ App.constant('RedditConfig', {
                     state: state,
                     redirect_uri: encodeURIComponent(RedditConfig.redirectUri),
                     duration: 'permanent',
-                    scope: 'privatemessages,identity'
+                    scope: RedditConfig.scope
                 },
                 options = {
                     interactive: true,
@@ -75,8 +75,6 @@ App.constant('RedditConfig', {
             return $.ajax({
                 url: 'https://ssl.reddit.com/api/v1/access_token',
                 type: 'POST',
-                dataType: 'JSON',
-                contentType: 'application/x-www-form-urlencoded;charset=utf-8',
                 headers: {
                     Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':' + RedditConfig.secret)
                 },
@@ -97,8 +95,6 @@ App.constant('RedditConfig', {
             return $.ajax({
                 url: 'https://ssl.reddit.com/api/v1/access_token',
                 type: 'POST',
-                dataType: 'JSON',
-                contentType: 'application/x-www-form-urlencoded;charset=utf-8',
                 headers: {
                     Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':' + RedditConfig.secret)
                 },
@@ -117,8 +113,6 @@ App.constant('RedditConfig', {
             return $.ajax({
                 url: 'https://oauth.reddit.com/api/v1/me',
                 type: 'GET',
-                dataType: 'JSON',
-                contentType: 'application/json',
                 headers: {
                     Authorization: 'bearer ' + RedditConfig.accessToken
                 }
@@ -140,8 +134,6 @@ App.constant('RedditConfig', {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/inbox',
                     type: 'GET',
-                    dataType: 'JSON',
-                    contentType: 'application/json',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
@@ -157,8 +149,6 @@ App.constant('RedditConfig', {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/unread',
                     type: 'GET',
-                    dataType: 'JSON',
-                    contentType: 'application/json',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
@@ -174,8 +164,6 @@ App.constant('RedditConfig', {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/sent',
                     type: 'GET',
-                    dataType: 'JSON',
-                    contentType: 'application/json',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
@@ -191,8 +179,6 @@ App.constant('RedditConfig', {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/api/read_message',
                     type: 'POST',
-                    dataType: 'JSON',
-                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
@@ -205,14 +191,28 @@ App.constant('RedditConfig', {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/api/unread_message',
                     type: 'POST',
-                    dataType: 'JSON',
-                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
                     data: {
                         id: messageID
                     }
+                });
+            },
+            postReplyMessage: function (replyToID, messageText) {
+                return $.ajax({
+                    url: 'https://oauth.reddit.com/api/comment',
+                    type: 'POST',
+                    headers: {
+                        Authorization: 'bearer ' + RedditConfig.accessToken
+                    },
+                    data: {
+                        api_type: 'json',
+                        text: messageText,
+                        thing_id: replyToID
+                    }
+                }).then(function (data) {
+                    return data.json.data.things;
                 });
             }
         });
