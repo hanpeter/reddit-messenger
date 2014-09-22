@@ -170,7 +170,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
     RedditService.getToken()
         .done(function (data) {
             updateMessages()
-            //setInterval(updateMessages, 30000);
+            setInterval(updateMessages, 30000);
 
             setInterval(checkUnreadMessages, 5000);
         });
