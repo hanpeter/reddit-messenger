@@ -1,4 +1,4 @@
-App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($scope, $sce, RedditService) {
+App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConfig', function ($scope, $sce, RedditService, RedditConfig) {
     function addMessage(messages, message) {
         var msg = {
                 id: message.id,
@@ -6,7 +6,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
                 body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
                 createDate: moment(message.created_utc* 1000),
                 isUnread: message.new,
-                isReceived: message.dest === RedditService.userName
+                isReceived: message.dest === RedditConfig.userName
             },
             thread = _.find(messages, function (m) { return m.threadID === message.first_message; });
 
@@ -14,7 +14,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', function ($
             thread = {
                 threadID: message.first_message,
                 subject: message.subject,
-                dest: message.author === RedditService.userName ? message.dest : message.author,
+                dest: message.author === RedditConfig.userName ? message.dest : message.author,
                 messages: [],
                 unreadCount: 0
             };
