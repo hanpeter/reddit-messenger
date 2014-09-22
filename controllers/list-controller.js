@@ -1,18 +1,18 @@
 App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConfig', function ($scope, $sce, RedditService, RedditConfig) {
     function addMessage(messages, message) {
         var msg = {
-                id: message.id,
+                id: message.name,
                 author: message.author,
                 body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
                 createDate: moment(message.created_utc* 1000),
                 isUnread: message.new,
                 isReceived: message.dest === RedditConfig.username
             },
-            thread = _.find(messages, function (m) { return m.threadID === message.first_message; });
+            thread = _.find(messages, function (m) { return m.threadID === message.first_message_name; });
 
         if (!thread) {
             thread = {
-                threadID: message.first_message,
+                threadID: message.first_message_name,
                 subject: message.subject,
                 dest: message.author === RedditConfig.username ? message.dest : message.author,
                 messages: [],
@@ -55,6 +55,26 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
             }
             else {
                 return momentDate.format('HH:mm:ss');
+            }
+        },
+        markAsRead: function (msg) {
+            if (!msg.isReceived) {
+                return;
+            }
+
+            if (msg.isUnread) {
+                RedditService.markMessageAsRead(msg.id);
+                msg.isUnread = false;
+
+                if ($scope.activeThread.unreadCount > 0) {
+                    $scope.activeThread.unreadCount--;
+                }
+            }
+            else {
+                RedditService.markMessageAsUnread(msg.id);
+                msg.isUnread = true;
+
+                $scope.activeThread.unreadCount++;
             }
         }
     });

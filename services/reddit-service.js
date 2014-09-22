@@ -186,6 +186,34 @@ App.constant('RedditConfig', {
                 }).then(function (data) {
                     return data.data;
                 });
+            },
+            markMessageAsRead: function (messageID) {
+                return $.ajax({
+                    url: 'https://oauth.reddit.com/api/read_message',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+                    headers: {
+                        Authorization: 'bearer ' + RedditConfig.accessToken
+                    },
+                    data: {
+                        id: messageID
+                    }
+                });
+            },
+            markMessageAsUnread: function (messageID) {
+                return $.ajax({
+                    url: 'https://oauth.reddit.com/api/unread_message',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+                    headers: {
+                        Authorization: 'bearer ' + RedditConfig.accessToken
+                    },
+                    data: {
+                        id: messageID
+                    }
+                });
             }
         });
     }]);
