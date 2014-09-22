@@ -6,7 +6,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
                 body: $sce.trustAsHtml('<p>' + message.body.replace(/\n\n/g, '</p><p>') + '</p>'),
                 createDate: moment(message.created_utc* 1000),
                 isUnread: message.new,
-                isReceived: message.dest === RedditConfig.userName
+                isReceived: message.dest === RedditConfig.username
             },
             thread = _.find(messages, function (m) { return m.threadID === message.first_message; });
 
@@ -14,15 +14,17 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
             thread = {
                 threadID: message.first_message,
                 subject: message.subject,
-                dest: message.author === RedditConfig.userName ? message.dest : message.author,
+                dest: message.author === RedditConfig.username ? message.dest : message.author,
                 messages: [],
                 unreadCount: 0
             };
             messages.push(thread);
         }
 
-        thread.unreadCount += (msg.isUnread) ? 1 : 0;
-        thread.messages.push(msg);
+        if (!_.some(thread.messages, function (value) { return value.id === msg.id; })) {
+            thread.unreadCount += (msg.isUnread) ? 1 : 0;
+            thread.messages.push(msg);
+        }
     }
 
     function sortMessages(messages) {
@@ -38,6 +40,7 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
     _.extend($scope, {
         messages: [],
         activeThread: null,
+        notificationID: '',
         setActiveThread: function (thread) {
             $scope.activeThread = thread;
         },
@@ -71,7 +74,6 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
                 messages = sortMessages(messages);
                 $scope.sync(function () {
                     $scope.messages = messages;
-                    console.log($scope.messages);
                 });
             });
 
@@ -79,12 +81,28 @@ App.controller('ListController', ['$scope', '$sce', 'RedditService', 'RedditConf
                 RedditService.getUnreadMessages()
                     .done(function (data) {
                         if (data.children.length > 0) {
+                            if (!!$scope.notificationID) {
+                                chrome.notifications.clear($scope.notificationID, $.noop);
+                            }
+
                             chrome.notifications.create('', {
                                 type: "basic",
                                 iconUrl: "/assets/icon_128.png",
-                                title: "Unread Message",
+                                title: "Unread Message for " + RedditConfig.username,
                                 message: "There is " + data.children.length + " unread messages."
-                            }, $.noop);
+                            }, function (notificationID) {
+                                $scope.sync(function () {
+                                    $scope.notificationID = notificationID;
+                                });
+                            });
+
+                            $scope.sync(function () {
+                                _.each(_.pluck(data.children, 'data'), function (value) {
+                                    addMessage($scope.messages, value);
+                                });
+
+                                $scope.messages = sortMessages($scope.messages);
+                            });
                         }
                     });
             }, 5000);
