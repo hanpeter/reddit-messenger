@@ -32,11 +32,19 @@
             .replyForm {
                 margin-top: 15px;
             }
+
+            .messages, .threads {
+                overflow-y: auto;
+                height: 100%;
+            }
+            html, body, div.content {
+                height: 100%;
+            }
         </style>
     </head>
     <body class="container" ng-controller="AppController">
         <div class="content">
-            <ul class="nav nav-pills nav-stacked col-xs-3" ng-controller="ThreadController">
+            <ul class="nav nav-pills nav-stacked col-xs-3 threads" ng-controller="ThreadController">
                 <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
                     <a ng-href="" ng-click="setActiveThread(thread)">
                         <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
@@ -45,7 +53,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="col-xs-9" ng-controller="MessageController">
+            <div class="col-xs-9 messages" ng-controller="MessageController">
                 <form class="replyForm" role="form" ng-show="!!activeThread">
                     <div class="form-group">
                         <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
