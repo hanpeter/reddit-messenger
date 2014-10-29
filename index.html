@@ -6,7 +6,6 @@
         <!-- Libraries -->
         <script src="/libraries/jquery/jquery-2.1.0.min.js"></script>
         <script src="/libraries/angularjs/angular.min.js"></script>
-        <script src="/libraries/angularjs/angular-route.min.js"></script>
         <link rel="stylesheet" href="/libraries/angularjs/angular-csp.css" type="text/css" />
         <script src="/libraries/bootstrap/js/bootstrap.min.js"></script>
         <script src="/libraries/underscorejs/underscore-min.js"></script>
@@ -18,10 +17,12 @@
 
         <!-- Services -->
         <script type="text/javascript" src="/services/reddit-service.js"></script>
+        <script type="text/javascript" src="/services/thread-factory-service.js"></script>
 
         <!-- Controllers -->
         <script type="text/javascript" src="/controllers/app-controller.js"></script>
-        <script type="text/javascript" src="/controllers/list-controller.js"></script>
+        <script type="text/javascript" src="/controllers/thread-controller.js"></script>
+        <script type="text/javascript" src="/controllers/message-controller.js"></script>
 
         <style>
             .bg-primary > h4.media-heading > small {
@@ -34,6 +35,32 @@
         </style>
     </head>
     <body class="container" ng-controller="AppController">
-        <div class="content" ng-view></div>
+        <div class="content">
+            <ul class="nav nav-pills nav-stacked col-xs-3" ng-controller="ThreadController">
+                <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
+                    <a ng-href="" ng-click="setActiveThread(thread)">
+                        <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
+                        <h4>{{thread.subject}}</h4>
+                        with {{thread.dest}}
+                    </a>
+                </li>
+            </ul>
+            <div class="col-xs-9" ng-controller="MessageController">
+                <form class="replyForm" role="form" ng-show="!!activeThread">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
+                    </div>
+                    <div class="clearfix">
+                        <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">Send</button>
+                    </div>
+                </form>
+                <div class="media" ng-repeat="msg in activeThread.messages">
+                    <div class="media-body" ng-class="{ 'bg-primary': msg.isUnread && msg.isReceived, 'bg-info': !msg.isUnread && msg.isReceived }" ng-click="markAsRead(msg)">
+                        <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>
+                        <div ng-bind-html="msg.body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -1,6 +1,5 @@
 App.constant('RedditConfig', {
-        clientID: '_OiiEDnIKbwbOg',
-        secret: 'QnJs4dIkJeVKCdo-kGQImw2ftlA',
+        clientID: 'NFcMPd6TpSQkdA',
         scope: 'privatemessages,identity,submit',
         redirectUri: 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'
     })
@@ -32,7 +31,7 @@ App.constant('RedditConfig', {
         function getOAuthToken() {
             var state = randomStateGenerator(20),
                 params = {
-                    client_id: '_OiiEDnIKbwbOg',
+                    client_id: RedditConfig.clientID,
                     response_type: 'code',
                     state: state,
                     redirect_uri: encodeURIComponent(RedditConfig.redirectUri),
@@ -76,7 +75,7 @@ App.constant('RedditConfig', {
                 url: 'https://ssl.reddit.com/api/v1/access_token',
                 type: 'POST',
                 headers: {
-                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':' + RedditConfig.secret)
+                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':')
                 },
                 data: {
                     grant_type: 'authorization_code',
@@ -96,7 +95,7 @@ App.constant('RedditConfig', {
                 url: 'https://ssl.reddit.com/api/v1/access_token',
                 type: 'POST',
                 headers: {
-                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':' + RedditConfig.secret)
+                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':')
                 },
                 data: {
                     grant_type: 'refresh_token',
