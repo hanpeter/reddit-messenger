@@ -30,31 +30,48 @@
             }
 
             .replyForm {
-                margin-top: 15px;
+                margin-top: 10px;
             }
 
             @media (min-width: 768px) {
-                .messages, .threads {
+                .threads {
+                    position: fixed;
+                    top: 10px;
+                    bottom: 10px;
+                    width: 150px;
                     overflow-y: auto;
-                    height: 100%;
                 }
-                html, body, div.content {
-                    height: 100%;
+                html {
+                    overflow-y: auto;
+                }
+            }
+
+            @media (min-width: 992px) {
+                .threads {
+                    width: 200px;
+                }
+            }
+
+            @media (min-width: 1200px) {
+                .threads {
+                    width: 250px;
                 }
             }
         </style>
     </head>
     <body class="container" ng-controller="AppController">
         <div class="content">
-            <ul class="nav nav-pills nav-stacked col-sm-3 threads" ng-controller="ThreadController">
-                <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
-                    <a ng-href="" ng-click="setActiveThread(thread)">
-                        <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
-                        <h4>{{thread.subject}}</h4>
-                        with {{thread.dest}}
-                    </a>
-                </li>
-            </ul>
+            <div class="col-sm-3">
+                <ul class="nav nav-pills nav-stacked threads" ng-controller="ThreadController">
+                    <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
+                        <a ng-href="" ng-click="setActiveThread(thread)">
+                            <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
+                            <h4>{{thread.subject}}</h4>
+                            with {{thread.dest}}
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <div class="col-sm-9 messages" ng-controller="MessageController">
                 <form class="replyForm" role="form" ng-show="!!activeThread">
                     <div class="form-group">
