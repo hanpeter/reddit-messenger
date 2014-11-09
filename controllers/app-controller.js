@@ -2,16 +2,6 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
     var notificationID = '',
         NOTIFICATION_BUFFER = 15000;
 
-    function updateMessages() {
-        var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
-        
-        ThreadFactoryService.updateThreads().done(function (threads) {
-            $scope.sync(function () {
-                $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
-            });
-        });
-    }
-
     function checkUnreadMessages() {
         var notiConfig = {
             type: "basic",
@@ -19,29 +9,31 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
             title: "Unread message(s) for " + RedditConfig.username
         };
 
-        ThreadFactoryService.checkUnreadMessages()
-            .done(function (count) {
-                if (count > 0) {
-                    _.extend(notiConfig, {
-                        message: "There is " + count + " unread messages."
-                    });
-
-                    if (!notificationID) {
-                        chrome.notifications.create('', notiConfig, function (nID) {
-                            notificationID = nID;
-
-                            setTimeout(function () {
-                                chrome.notifications.clear(notificationID, function () {
-                                    notificationID = '';
-                                });
-                            }, NOTIFICATION_BUFFER);
+        $scope.sync(function () {
+            ThreadFactoryService.checkUnreadMessages()
+                .done(function (count) {
+                    if (count > 0) {
+                        _.extend(notiConfig, {
+                            message: "There is " + count + " unread messages."
                         });
+
+                        if (!notificationID) {
+                            chrome.notifications.create('', notiConfig, function (nID) {
+                                notificationID = nID;
+
+                                setTimeout(function () {
+                                    chrome.notifications.clear(notificationID, function () {
+                                        notificationID = '';
+                                    });
+                                }, NOTIFICATION_BUFFER);
+                            });
+                        }
+                        else {
+                            chrome.notifications.update(notificationID, notiConfig, $.noop);
+                        }
                     }
-                    else {
-                        chrome.notifications.update(notificationID, notiConfig, $.noop);
-                    }
-                }
-            });
+                });
+        });
     }
 
     _.extend($scope, {
@@ -57,14 +49,21 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
         },
         setActiveThread: function (thread) {
             $scope.activeThread = thread;
+        },
+        updateMessages: function () {
+            var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
+
+            ThreadFactoryService.updateThreads().done(function (threads) {
+                $scope.sync(function () {
+                    $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
+                });
+            });
         }
     });
 
     RedditService.getToken()
         .done(function () {
-            updateMessages()
-            setInterval(updateMessages, 30000);
-
+            $scope.updateMessages()
             setInterval(checkUnreadMessages, 5000);
         });
 }]);

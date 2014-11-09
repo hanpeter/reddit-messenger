@@ -71,8 +71,6 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
                         });
                     }
 
-                    sortThreads();
-
                     return data.children.length;
                 });
         }

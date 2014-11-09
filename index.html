@@ -61,7 +61,14 @@
                         <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
                     </div>
                     <div class="clearfix">
-                        <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">Send</button>
+                        <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">
+                            <span class="glyphicon glyphicon-send"></span>
+                            Send
+                        </button>
+                        <button type="button" class="btn btn-default pull-left" ng-click="updateMessages()">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                            Refresh
+                        </button>
                     </div>
                 </form>
                 <div class="media" ng-repeat="msg in activeThread.messages">
