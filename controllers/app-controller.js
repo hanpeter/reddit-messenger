@@ -55,6 +55,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
 
             ThreadFactoryService.updateThreads().done(function (threads) {
                 $scope.sync(function () {
+                    $scope.messages = threads;
                     $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
                 });
             });
