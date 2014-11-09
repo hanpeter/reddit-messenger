@@ -38,12 +38,12 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
                     messages: [],
                     unreadCount: 0
                 };
-                me.threads.push(thread);
+                me.threads.unshift(thread);
             }
 
             if (!_.some(thread.messages, function (value) { return value.id === msg.id; })) {
                 thread.unreadCount += (msg.isUnread) ? 1 : 0;
-                thread.messages.push(msg);
+                thread.messages.unshift(msg);
             }
         },
         updateThreads: function () {
