@@ -65,11 +65,9 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()
                 .then(function (data) {
-                    if (data.children.length > 0) {
-                        _.each(_.pluck(data.children, 'data'), function (value) {
-                            me.addMessage(value);
-                        });
-                    }
+                    _.each(_.pluck(data.children, 'data'), function (value) {
+                        me.addMessage(value);
+                    });
 
                     return data.children.length;
                 });
