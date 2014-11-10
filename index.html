@@ -40,6 +40,7 @@
                     bottom: 10px;
                     width: 150px;
                     overflow-y: auto;
+                    overflow-x: hidden;
                 }
                 ul.threads > li {
                     margin-right: 10px;
@@ -75,26 +76,29 @@
                     </li>
                 </ul>
             </div>
-            <div class="col-sm-9 messages" ng-controller="MessageController">
-                <form class="replyForm" role="form" ng-show="!!activeThread">
-                    <div class="form-group">
-                        <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
-                    </div>
-                    <div class="clearfix">
-                        <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">
-                            <span class="glyphicon glyphicon-send"></span>
-                            Send
-                        </button>
-                        <button type="button" class="btn btn-default pull-left" ng-click="updateMessages()">
-                            <span class="glyphicon glyphicon-refresh"></span>
-                            Refresh
-                        </button>
-                    </div>
-                </form>
-                <div class="media" ng-repeat="msg in activeThread.messages">
-                    <div class="media-body" ng-class="{ 'bg-primary': msg.isUnread && msg.isReceived, 'bg-info': !msg.isUnread && msg.isReceived }" ng-click="markAsRead(msg)">
-                        <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>
-                        <div ng-bind-html="msg.body"></div>
+            <div class="col-sm-9">
+                <div class="menu"></div>
+                <div class="messages" ng-controller="MessageController">
+                    <form class="replyForm" role="form" ng-show="!!activeThread">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
+                        </div>
+                        <div class="clearfix">
+                            <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">
+                                <span class="glyphicon glyphicon-send"></span>
+                                Send
+                            </button>
+                            <button type="button" class="btn btn-default pull-left" ng-click="updateMessages()">
+                                <span class="glyphicon glyphicon-refresh"></span>
+                                Refresh
+                            </button>
+                        </div>
+                    </form>
+                    <div class="media" ng-repeat="msg in activeThread.messages">
+                        <div class="media-body" ng-class="{ 'bg-primary': msg.isUnread && msg.isReceived, 'bg-info': !msg.isUnread && msg.isReceived }" ng-click="markAsRead(msg)">
+                            <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>
+                            <div ng-bind-html="msg.body"></div>
+                        </div>
                     </div>
                 </div>
             </div>
