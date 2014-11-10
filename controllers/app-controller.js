@@ -1,4 +1,4 @@
-App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', function ($scope, RedditService, RedditConfig, ThreadFactoryService) {
+App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', 'NotificationService', function ($scope, RedditService, RedditConfig, ThreadFactoryService, NotificationService) {
     var notificationID = '',
         NOTIFICATION_BUFFER = 15000,
         NOTIFICATION_SNOOZE = 30000,
@@ -13,37 +13,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
 
         $scope.sync(function () {
             ThreadFactoryService.checkUnreadMessages()
-                .done(function (count) {
-                    if (moment().isAfter(notificationRefreshTime)) {
-                        chrome.notifications.clear(notificationID, $.noop);
-                        notificationID = '';
-                    }
-                    
-                    if (count > 0) {
-                        _.extend(notiConfig, {
-                            message: "There is " + count + " unread messages."
-                        });
-
-                        if (!notificationID) {
-                            chrome.notifications.create('', notiConfig, function (nID) {
-                                notificationID = nID;
-
-                                new Audio('/assets/notification.mp3').play();
-
-                                notificationRefreshTime = moment().add(NOTIFICATION_BUFFER, 'ms');
-                            });
-                        }
-                        else {
-                            chrome.notifications.update(notificationID, notiConfig, $.noop);
-                        }
-                    }
-
-                    chrome.notifications.onClicked.addListener(function (nID) {
-                        if (nID === notificationID) {
-                            notificationRefreshTime = moment().add(NOTIFICATION_SNOOZE, 'ms');
-                        }
-                    });
-                });
+                .done(NotificationService.update);
         });
     }
 
