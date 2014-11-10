@@ -1,5 +1,5 @@
 App.constant('RedditConfig', {
-        clientID: 'NFcMPd6TpSQkdA',
+        clientID: '_OiiEDnIKbwbOg',
         scope: 'privatemessages,identity,submit',
         redirectUri: 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'
     })
@@ -123,6 +123,10 @@ App.constant('RedditConfig', {
 
         _.extend(me, {
             getToken: function () {
+                if (chrome.runtime.id !== 'dbdabkkhkmahpcihjdkacnkbofblmgcp') {
+                    RedditConfig.clientID = 'NFcMPd6TpSQkdA';
+                }
+
                 return getOAuthToken()
                     .then(getAccessToken)
                     .then(function (expirationTime) {
