@@ -1,6 +1,8 @@
 App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', function ($scope, RedditService, RedditConfig, ThreadFactoryService) {
     var notificationID = '',
-        NOTIFICATION_BUFFER = 15000;
+        NOTIFICATION_BUFFER = 15000,
+        NOTIFICATION_SNOOZE = 30000,
+        notificationRefreshTime = moment();
 
     function checkUnreadMessages() {
         var notiConfig = {
@@ -12,6 +14,11 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
         $scope.sync(function () {
             ThreadFactoryService.checkUnreadMessages()
                 .done(function (count) {
+                    if (moment().isAfter(notificationRefreshTime)) {
+                        chrome.notifications.clear(notificationID, $.noop);
+                        notificationID = '';
+                    }
+                    
                     if (count > 0) {
                         _.extend(notiConfig, {
                             message: "There is " + count + " unread messages."
@@ -21,19 +28,21 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
                             chrome.notifications.create('', notiConfig, function (nID) {
                                 notificationID = nID;
 
-                                setTimeout(function () {
-                                    chrome.notifications.clear(notificationID, function () {
-                                        notificationID = '';
-                                    });
-                                }, NOTIFICATION_BUFFER);
-
                                 new Audio('/assets/notification.mp3').play();
+
+                                notificationRefreshTime = moment().add(NOTIFICATION_BUFFER, 'ms');
                             });
                         }
                         else {
                             chrome.notifications.update(notificationID, notiConfig, $.noop);
                         }
                     }
+
+                    chrome.notifications.onClicked.addListener(function (nID) {
+                        if (nID === notificationID) {
+                            notificationRefreshTime = moment().add(NOTIFICATION_SNOOZE, 'ms');
+                        }
+                    });
                 });
         });
     }
