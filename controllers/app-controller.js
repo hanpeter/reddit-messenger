@@ -26,6 +26,8 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
                                         notificationID = '';
                                     });
                                 }, NOTIFICATION_BUFFER);
+
+                                new Audio('/assets/notification.mp3').play();
                             });
                         }
                         else {
