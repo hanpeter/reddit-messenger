@@ -80,12 +80,12 @@
             <div class="col-sm-9">
                 <div class="menu"></div>
                 <div class="messages" ng-controller="MessageController">
-                    <form class="replyForm" role="form" ng-show="!!activeThread">
+                    <form class="replyForm" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="$event.keyCode === 10 && reply()">
                         <div class="form-group">
                             <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
                         </div>
                         <div class="clearfix">
-                            <button type="button" class="btn btn-primary pull-right" ng-disabled="!replyMsg" ng-click="reply()">
+                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!replyMsg">
                                 <span class="glyphicon glyphicon-send"></span>
                                 Send
                             </button>
