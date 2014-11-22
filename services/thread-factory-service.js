@@ -1,13 +1,28 @@
 App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', function ($sce, RedditService, RedditConfig) {
     var me = this;
 
+    function compareMessages(msg1, msg2) {
+        var createDate1 = msg1.createDate.unix();
+        var createDate2 = msg2.createDate.unix();
+
+        if (createDate1 < createDate2) {
+            return 1;
+        }
+        else if (createDate2 < createDate1) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    }
+
     function sortThreads() {
         _.each(me.threads, function (thread) {
-            thread.messages = _.sortBy(thread.messages, function (msg) { return msg.createDate.unix() * -1; });
+            thread.messages.sort(compareMessages);
         });
 
-        me.threads = _.sortBy(me.threads, function (thread) {
-            return thread.messages[0].createDate.unix() * -1;
+        me.threads.sort(function (thread1, thread2) {
+            return compareMessages(thread1.messages[0], thread2.messages[0]);
         });
     }
 
@@ -16,17 +31,9 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
         getThreads: function () {
             return me.threads;
         },
-        addMessage: function (message) {
-            var bodyHtml = $('<textarea/>').html(message.body_html).text(),
-                msg = {
-                    id: message.name,
-                    author: message.author,
-                    body: $sce.trustAsHtml(bodyHtml),
-                    createDate: moment(message.created_utc* 1000),
-                    isUnread: message.new,
-                    isReceived: message.dest === RedditConfig.username
-                },
-                thread = _.find(me.threads, function (thread) {
+        saveMessage: function (message) {
+            var bodyHtml = $('<textarea/>').html(message.body_html).text();
+            var thread = _.find(me.threads, function (thread) {
                     return !!message.first_message_name ? thread.threadID === message.first_message_name : thread.threadID === message.name;
                 });
 
@@ -41,7 +48,26 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
                 me.threads.unshift(thread);
             }
 
-            if (!_.some(thread.messages, function (value) { return value.id === msg.id; })) {
+            var msg = _.find(thread.messages, function (value) { return value.id === message.name; });
+            if (msg) {
+                if (msg.isUnread && !message.new) {
+                    thread.unreadCount--;
+                }
+                else if (!msg.isUnread && message.new) {
+                    thread.unreadCount++;
+                }
+                msg.isUnread = message.new;
+            }
+            else {
+                // This message is new. Create it.
+                msg = {
+                    id: message.name,
+                    author: message.author,
+                    body: $sce.trustAsHtml(bodyHtml),
+                    createDate: moment(message.created_utc * 1000),
+                    isUnread: message.new,
+                    isReceived: message.dest === RedditConfig.username
+                };
                 thread.unreadCount += (msg.isUnread) ? 1 : 0;
                 thread.messages.unshift(msg);
             }
@@ -54,7 +80,7 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
                 var messages = [];
 
                 _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
-                    me.addMessage(value);
+                    me.saveMessage(value);
                 });
 
                 sortThreads();
@@ -66,7 +92,7 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
             return RedditService.getUnreadMessages()
                 .then(function (data) {
                     _.each(_.pluck(data.children, 'data'), function (value) {
-                        me.addMessage(value);
+                        me.saveMessage(value);
                     });
 
                     return data.children.length;

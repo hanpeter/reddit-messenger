@@ -47,7 +47,7 @@ App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactorySe
                         $scope.replyMsg = '';
 
                         _.each(_.pluck(messages, 'data'), function (value) {
-                            ThreadFactoryService.addMessage(value);
+                            ThreadFactoryService.saveMessage(value);
                         });
                     });
                 });
