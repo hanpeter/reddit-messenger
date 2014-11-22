@@ -5,12 +5,6 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
         notificationRefreshTime = moment();
 
     function checkUnreadMessages() {
-        var notiConfig = {
-            type: "basic",
-            iconUrl: "/assets/icon_128.png",
-            title: "Unread message(s) for " + RedditConfig.username
-        };
-
         $scope.sync(function () {
             ThreadFactoryService.checkUnreadMessages()
                 .done(NotificationService.update);
