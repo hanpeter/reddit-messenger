@@ -24,6 +24,7 @@
         <script type="text/javascript" src="/controllers/app-controller.js"></script>
         <script type="text/javascript" src="/controllers/thread-controller.js"></script>
         <script type="text/javascript" src="/controllers/message-controller.js"></script>
+        <script type="text/javascript" src="/controllers/option-controller.js"></script>
 
         <style>
             .bg-primary > h4.media-heading > small {
@@ -127,7 +128,7 @@
                 </div>
             </div>
         </div>
-        <div id="optionsModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div id="optionsModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" ng-controller="OptionController">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -140,20 +141,20 @@
                                     Refresh Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="refreshInterval" class="form-control" min="2" max="9999" step="1" />
+                                    <input type="number" id="refreshInterval" class="form-control" min="2" max="9999" step="1" ng-model="refreshInterval" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
-                                <span class="help-block">The messenger will refresh the whole message set every x seconds.</span>
+                                <span class="help-block">The messenger will refresh the whole message set every {{refreshInterval}} seconds.</span>
                             </div>
                             <div class="form-group">
                                 <label for="checkInterval" class="control-label">
                                     Unread Check Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="checkInterval" class="form-control" min="2" max="9999" step="1" />
+                                    <input type="number" id="checkInterval" class="form-control" min="2" max="9999" step="1" ng-model="checkInterval" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
-                                <span class="help-block">The messenger will check for unread messages every x seconds.</span>
+                                <span class="help-block">The messenger will check for unread messages every {{checkInterval}} seconds.</span>
                             </div>
                         </form>
                     </div>
