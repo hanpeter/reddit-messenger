@@ -44,6 +44,10 @@
                 margin-right: 0;
             }
 
+            .modal {
+                overflow-y: auto;
+            }
+
             @media (min-width: 768px) {
                 .threads {
                     position: fixed;
@@ -135,7 +139,21 @@
                                 <label for="refreshInterval" class="control-label">
                                     Refresh Interval
                                 </label>
-                                <input type="number" class="form-control" id="refreshInterval" />
+                                <div class="input-group">
+                                    <input type="number" id="refreshInterval" class="form-control" min="2" max="9999" step="1" />
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                                <span class="help-block">The messenger will refresh the whole message set every x seconds.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="checkInterval" class="control-label">
+                                    Unread Check Interval
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" id="checkInterval" class="form-control" min="2" max="9999" step="1" />
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                                <span class="help-block">The messenger will check for unread messages every x seconds.</span>
                             </div>
                         </form>
                     </div>
