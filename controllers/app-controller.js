@@ -1,18 +1,20 @@
-App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', 'NotificationService', 'AppConfig', 'StorageService',
-    function ($scope, RedditService, RedditConfig, ThreadFactoryService, NotificationService, AppConfig, StorageService) {
+App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', 'NotificationService', 'StorageService',
+    function ($scope, RedditService, RedditConfig, ThreadFactoryService, NotificationService, StorageService) {
+        var config;
+
         function checkUnreadMessages() {
             $scope.sync(function () {
                 ThreadFactoryService.checkUnreadMessages()
                     .done(NotificationService.update);
             });
 
-            setTimeout(checkUnreadMessages, AppConfig.checkInterval * 1000);
+            setTimeout(checkUnreadMessages, config.checkInterval * 1000);
         }
 
         function autoRefreshMessages() {
             $scope.updateMessages();
 
-            setTimeout(autoRefreshMessages, AppConfig.refreshInterval * 1000);
+            setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
         }
 
         _.extend($scope, {
@@ -41,9 +43,13 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
             }
         });
 
-        RedditService.getToken()
-            .done(function () {
-                autoRefreshMessages();
-                checkUnreadMessages();
-            });
+        $.when(
+            StorageService.loadConfigs(),
+            RedditService.getToken()
+        ).done(function (c) {
+            config = c;
+
+            autoRefreshMessages();
+            checkUnreadMessages();
+        });
     }]);

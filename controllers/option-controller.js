@@ -1,16 +1,13 @@
-App.controller('OptionController', ['$scope', 'AppConfig', 'StorageService', function ($scope, AppConfig, StorageService) {
-    StorageService.loadConfigs().done(function () {
-        $scope.refreshInterval = AppConfig.refreshInterval;
-        $scope.checkInterval = AppConfig.checkInterval;
-    });
+App.controller('OptionController', ['$scope', 'StorageService', function ($scope, StorageService) {
     _.extend($scope, {
-        refreshInterval: AppConfig.refreshInterval,
-        checkInterval: AppConfig.checkInterval,
+        refreshInterval: undefined,
+        checkInterval: undefined,
         isUpdating: false,
         updateConfig: function () {
-            AppConfig.refreshInterval = $scope.refreshInterval;
-            AppConfig.checkInterval = $scope.checkInterval;
-            StorageService.saveConfigs().done(function () {
+            StorageService.saveConfigs({
+                refreshInterval: $scope.refreshInterval,
+                checkInterval: $scope.checkInterval
+            }).done(function () {
                 $scope.sync(function () {
                     $scope.isUpdating = true;
                 });
@@ -21,5 +18,10 @@ App.controller('OptionController', ['$scope', 'AppConfig', 'StorageService', fun
                 }, 5000);
             });
         }
+    });
+
+    StorageService.loadConfigs().done(function (config) {
+        $scope.refreshInterval = config.refreshInterval;
+        $scope.checkInterval = config.checkInterval;
     });
 }]);
