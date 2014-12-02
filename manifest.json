@@ -1,8 +1,8 @@
 {
     "name": "Reddit Messenger",
-    "version": "0.0.0.5",
+    "version": "0.0.0.6",
     "manifest_version": 2,
-    "description": "TODO",
+    "description": "Messenger for Reddit private messages",
     "permissions": [
         "storage",
         "identity",
