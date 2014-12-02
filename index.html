@@ -31,6 +31,9 @@
             .bg-primary > h4.media-heading > small {
                 color: #CCCCCC;
             }
+            .btn > .button-text {
+                display: none;
+            }
 
             .replyForm,
             .menu {
@@ -44,9 +47,6 @@
             }
             .menu > .btn:first-child {
                 margin-right: 0;
-            }
-            .menu > .btn > .button-text {
-                display: none;
             }
 
             .modal {
@@ -69,11 +69,12 @@
                     overflow-y: auto;
                 }
 
+                .btn > .button-text {
+                    display: inline;
+                }
+
                 .menu {
                     margin-bottom: 0;
-                }
-                .menu > .btn > .button-text {
-                    display: inline;
                 }
             }
 
@@ -122,7 +123,7 @@
                         <div class="clearfix">
                             <button type="submit" class="btn btn-primary pull-right" ng-disabled="!replyMsg">
                                 <span class="glyphicon glyphicon-send"></span>
-                                Send
+                                <span class="button-text">Send</span>
                             </button>
                         </div>
                     </form>
