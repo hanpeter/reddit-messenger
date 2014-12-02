@@ -19,6 +19,7 @@
         <script type="text/javascript" src="/services/reddit-service.js"></script>
         <script type="text/javascript" src="/services/thread-factory-service.js"></script>
         <script type="text/javascript" src="/services/notification-service.js"></script>
+        <script type="text/javascript" src="/services/storage-service.js"></script>
 
         <!-- Controllers -->
         <script type="text/javascript" src="/controllers/app-controller.js"></script>
@@ -141,13 +142,13 @@
                         <h4 class="modal-title">Options</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="optionForm" role="form" ng-submit="saveOption()">
+                        <form class="optionForm" role="form">
                             <div class="form-group">
                                 <label for="refreshInterval" class="control-label">
                                     Refresh Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="refreshInterval" class="form-control" min="2" max="9999" step="1" ng-model="refreshInterval" />
+                                    <input type="number" id="refreshInterval" class="form-control" min="2" step="1" ng-model="refreshInterval" ng-blur="updateConfig()" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
                                 <span class="help-block">The messenger will refresh the whole message set every {{refreshInterval}} seconds.</span>
@@ -157,7 +158,7 @@
                                     Unread Check Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="checkInterval" class="form-control" min="2" max="9999" step="1" ng-model="checkInterval" />
+                                    <input type="number" id="checkInterval" class="form-control" min="2" step="1" ng-model="checkInterval" ng-blur="updateConfig()" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
                                 <span class="help-block">The messenger will check for unread messages every {{checkInterval}} seconds.</span>
