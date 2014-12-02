@@ -2,7 +2,9 @@ App.service('StorageService', function () {
         var isLoaded = false,
             config = {
                 refreshInterval: 30,
-                checkInterval: 5
+                checkInterval: 5,
+                winWidth: 800,
+                winHeight: 600
             }
 
         _.extend(this, {

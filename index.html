@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="App" ng-csp>
+<html lang="en" ng-app="App" ng-csp my-resize>
     <head>
         <title>Reddit Messenger</title>
 
@@ -13,19 +13,22 @@
         <script src="/libraries/momentjs/moment.min.js"></script>
 
         <!-- App -->
-        <script type="text/javascript" src="/app.js"></script>
+        <script src="/app.js"></script>
 
         <!-- Services -->
-        <script type="text/javascript" src="/services/reddit-service.js"></script>
-        <script type="text/javascript" src="/services/thread-factory-service.js"></script>
-        <script type="text/javascript" src="/services/notification-service.js"></script>
-        <script type="text/javascript" src="/services/storage-service.js"></script>
+        <script src="/services/reddit-service.js"></script>
+        <script src="/services/thread-factory-service.js"></script>
+        <script src="/services/notification-service.js"></script>
+        <script src="/services/storage-service.js"></script>
+
+        <!-- Directives -->
+        <script src="/directives/my-resize.js"></script>
 
         <!-- Controllers -->
-        <script type="text/javascript" src="/controllers/app-controller.js"></script>
-        <script type="text/javascript" src="/controllers/thread-controller.js"></script>
-        <script type="text/javascript" src="/controllers/message-controller.js"></script>
-        <script type="text/javascript" src="/controllers/option-controller.js"></script>
+        <script src="/controllers/app-controller.js"></script>
+        <script src="/controllers/thread-controller.js"></script>
+        <script src="/controllers/message-controller.js"></script>
+        <script src="/controllers/option-controller.js"></script>
 
         <style>
             .bg-primary > h4.media-heading > small {

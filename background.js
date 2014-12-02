@@ -1,11 +1,13 @@
 chrome.app.runtime.onLaunched.addListener(function() {
-    chrome.app.window.create('index.html', {
-        innerBounds: {
-            width: 800,
-            height: 500
-        },
-        frame: {
-            type: 'chrome'
-        }
+    var dimensions = chrome.storage.sync.get(['winWidth', 'winHeight'], function (data) {
+        chrome.app.window.create('index.html', {
+            innerBounds: {
+                width: data.winWidth || 800,
+                height: data.winHeight || 600
+            },
+            frame: {
+                type: 'chrome'
+            }
+        });
     });
 });
