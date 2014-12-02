@@ -44,6 +44,9 @@
             .menu > .btn:first-child {
                 margin-right: 0;
             }
+            .menu > .btn > .button-text {
+                display: none;
+            }
 
             .modal {
                 overflow-y: auto;
@@ -68,6 +71,9 @@
                 .menu {
                     margin-bottom: 0;
                 }
+                .menu > .btn > .button-text {
+                    display: inline;
+                }
             }
 
             @media (min-width: 992px) {
@@ -88,11 +94,11 @@
             <div class="col-sm-12 menu clearfix">
                 <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#optionsModal">
                     <span class="glyphicon glyphicon-cog"></span>
-                    Options
+                    <span class="button-text">Options</span>
                 </button>
                 <button type="button" class="btn btn-default pull-right" ng-click="updateMessages()">
                     <span class="glyphicon glyphicon-refresh"></span>
-                    Refresh
+                    <span class="button-text">Refresh</span>
                 </button>
             </div>
             <div class="col-sm-3">
