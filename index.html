@@ -149,20 +149,28 @@
                                     Refresh Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="refreshInterval" class="form-control" min="2" step="1" ng-model="refreshInterval" ng-blur="updateConfig()" />
+                                    <span class="input-group-addon">
+                                        <input type="checkbox" ng-click="toggleRefreshInterval()" ng-checked="refreshInterval > 0" />
+                                    </span>
+                                    <input type="number" id="refreshInterval" class="form-control" min="2" step="1" ng-model="refreshInterval" ng-blur="updateConfig()" ng-disabled="refreshInterval < 1" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
-                                <span class="help-block">The messenger will refresh the whole message set every {{refreshInterval}} seconds.</span>
+                                <span class="help-block" ng-show="refreshInterval > 0">The messenger will refresh the whole message set every {{refreshInterval}} seconds.</span>
+                                <span class="help-block" ng-show="refreshInterval < 1">The messenger will not refresh the whole message set.</span>
                             </div>
                             <div class="form-group">
                                 <label for="checkInterval" class="control-label">
                                     Unread Check Interval
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="checkInterval" class="form-control" min="2" step="1" ng-model="checkInterval" ng-blur="updateConfig()" />
+                                    <span class="input-group-addon">
+                                        <input type="checkbox" ng-click="toggleCheckInterval()" ng-checked="checkInterval > 0" />
+                                    </span>
+                                    <input type="number" id="checkInterval" class="form-control" min="2" step="1" ng-model="checkInterval" ng-blur="updateConfig()" ng-disabled="checkInterval < 1" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
-                                <span class="help-block">The messenger will check for unread messages every {{checkInterval}} seconds.</span>
+                                <span class="help-block" ng-show="checkInterval > 0">The messenger will check for unread messages every {{checkInterval}} seconds.</span>
+                                <span class="help-block" ng-show="checkInterval < 1">The messenger will not check for unread messages.</span>
                             </div>
                         </form>
                     </div>

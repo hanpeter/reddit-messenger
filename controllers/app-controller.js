@@ -1,6 +1,8 @@
 App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', 'NotificationService', 'StorageService',
     function ($scope, RedditService, RedditConfig, ThreadFactoryService, NotificationService, StorageService) {
-        var config;
+        var config = undefined;
+        var checkTimeoutID = undefined;
+        var refreshTimeoutID = undefined;
 
         function checkUnreadMessages() {
             $scope.sync(function () {
@@ -8,13 +10,19 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
                     .done(NotificationService.update);
             });
 
-            setTimeout(checkUnreadMessages, config.checkInterval * 1000);
+            if (config.checkInterval > 0) {
+                clearTimeout(checkTimeoutID);
+                checkTimeoutID = setTimeout(checkUnreadMessages, config.checkInterval * 1000);
+            }
         }
 
         function autoRefreshMessages() {
             $scope.updateMessages();
 
-            setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
+            if (config.refreshInterval > 0) {
+                clearTimeout(refreshTimeoutID);
+                refreshTimeoutID = setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
+            }
         }
 
         _.extend($scope, {
@@ -40,6 +48,16 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
                         $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
                     });
                 });
+            },
+            resetTimeout: function () {
+                if (config.checkInterval > 0) {
+                    clearTimeout(checkTimeoutID);
+                    checkTimeoutID = setTimeout(checkUnreadMessages, config.checkInterval * 1000);
+                }
+                if (config.refreshInterval > 0) {
+                    clearTimeout(refreshTimeoutID);
+                    refreshTimeoutID = setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
+                }
             }
         });
 
