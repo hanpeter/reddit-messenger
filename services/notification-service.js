@@ -1,4 +1,4 @@
-App.service('NotificationService', ['RedditConfig', function (RedditConfig) {
+App.service('NotificationService', ['$timeout', 'RedditConfig', function ($timeout, RedditConfig) {
     var me = this,
         NOTIFICATION_BUFFER = 15000,
         NOTIFICATION_SNOOZE = 300000;
@@ -40,24 +40,26 @@ App.service('NotificationService', ['RedditConfig', function (RedditConfig) {
             };
 
             return me.clear().then(function() {
-                if (count > 0) {
-                    _.extend(config, {
-                        message: "There is " + count + " unread messages."
-                    });
-
-                    if (!me.notificationID) {
-                        chrome.notifications.create('', config, function (nID) {
-                            me.notificationID = nID;
-
-                            new Audio('/assets/notification.mp3').play();
-
-                            me.notificationRefreshTime = moment().add(NOTIFICATION_BUFFER, 'ms');
+                $timeout(function () {
+                    if (count > 0) {
+                        _.extend(config, {
+                            message: "There is " + count + " unread messages."
                         });
+
+                        if (!me.notificationID) {
+                            chrome.notifications.create('', config, function (nID) {
+                                me.notificationID = nID;
+
+                                new Audio('/assets/notification.mp3').play();
+
+                                me.notificationRefreshTime = moment().add(NOTIFICATION_BUFFER, 'ms');
+                            });
+                        }
+                        else {
+                            chrome.notifications.update(me.notificationID, config, $.noop);
+                        }
                     }
-                    else {
-                        chrome.notifications.update(me.notificationID, config, $.noop);
-                    }
-                }
+                });
             });
         }
     });
