@@ -125,10 +125,10 @@
                 <div class="messages" ng-controller="MessageController">
                     <form class="replyForm" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="$event.keyCode === 10 && reply()">
                         <div class="form-group">
-                            <textarea class="form-control" rows="3" ng-model="replyMsg"></textarea>
+                            <textarea class="form-control" rows="3" ng-model="activeThread.replyMsg"></textarea>
                         </div>
                         <div class="clearfix">
-                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!replyMsg">
+                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!activeThread.replyMsg || isReplying">
                                 <span class="glyphicon glyphicon-send"></span>
                                 <span class="button-text">Send</span>
                             </button>

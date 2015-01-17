@@ -1,6 +1,6 @@
 App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactoryService', function ($scope, RedditService, ThreadFactoryService) {
     _.extend($scope, {
-        replyMsg: '',
+        isReplying: false,
         displayDate: function (momentDate) {
             var currentTime = moment();
 
@@ -37,18 +37,23 @@ App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactorySe
         reply: function () {
             var replyTo = _.find($scope.activeThread.messages, function (msg) { return msg.isReceived; });
 
+            $scope.isReplying = true;
+
             if (!replyTo) {
+                $scope.isReplying = false;
                 return;
             }
 
-            RedditService.postReplyMessage(replyTo.id, $scope.replyMsg)
+            RedditService.postReplyMessage(replyTo.id, $scope.activeThread.replyMsg)
                 .done(function (messages) {
                     $scope.sync(function () {
-                        $scope.replyMsg = '';
+                        $scope.activeThread.replyMsg = '';
 
                         _.each(_.pluck(messages, 'data'), function (value) {
                             ThreadFactoryService.saveMessage(value);
                         });
+
+                        $scope.isReplying = false;
                     });
                 });
         }
