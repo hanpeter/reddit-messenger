@@ -134,47 +134,47 @@ App.constant('RedditConfig', {
                         getUserInfo();
                     });
             },
-            getInboxMessages: function (count) {
+            getInboxMessages: function (config) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/inbox',
                     type: 'GET',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
-                    data: {
+                    data: _.extend({
                         mark: false,
-                        limit: count || 25
-                    }
+                        limit: 25
+                    }, config)
                 }).then(function (data) {
                     return data.data;
                 });
             },
-            getUnreadMessages: function (count) {
+            getUnreadMessages: function (config) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/unread',
                     type: 'GET',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
-                    data: {
+                    data: _.extend({
                         mark: false,
-                        limit: count || 25
-                    }
+                        limit: 25
+                    }, config)
                 }).then(function (data) {
                     return data.data;
                 });
             },
-            getSentMessages: function (count) {
+            getSentMessages: function (config) {
                 return $.ajax({
                     url: 'https://oauth.reddit.com/message/sent',
                     type: 'GET',
                     headers: {
                         Authorization: 'bearer ' + RedditConfig.accessToken
                     },
-                    data: {
+                    data: _.extend({
                         mark: false,
-                        limit: count || 25
-                    }
+                        limit: 25
+                    }, config)
                 }).then(function (data) {
                     return data.data;
                 });

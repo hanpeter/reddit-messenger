@@ -1,5 +1,9 @@
 App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', function ($sce, RedditService, RedditConfig) {
-    var me = this;
+    var me = this,
+        lastMessages = {
+            inbox: undefined,
+            sent: undefined
+        };
 
     function compareMessages(msg1, msg2) {
         var createDate1 = msg1.createDate.unix();
@@ -24,6 +28,21 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
         me.threads.sort(function (thread1, thread2) {
             return compareMessages(thread1.messages[0], thread2.messages[0]);
         });
+    }
+
+    function processMessages(inbox, sent) {
+        var messages = [];
+
+        lastMessages.inbox = _.last(inbox.children).data.name;
+        lastMessages.sent = _.last(sent.children).data.name;
+
+        _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
+            me.saveMessage(value);
+        });
+
+        sortThreads();
+
+        return me.getThreads();
     }
 
     _.extend(me, {
@@ -74,19 +93,9 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
         },
         updateThreads: function () {
             return $.when(
-                RedditService.getInboxMessages(100),
-                RedditService.getSentMessages(100)
-            ).then(function (inbox, sent) {
-                var messages = [];
-
-                _.each(_.pluck(inbox.children.concat(sent.children), 'data'), function (value) {
-                    me.saveMessage(value);
-                });
-
-                sortThreads();
-
-                return me.getThreads();
-            });
+                RedditService.getInboxMessages({ limit: 100 }),
+                RedditService.getSentMessages({ limit: 100 })
+            ).then(processMessages);
         },
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()
@@ -97,6 +106,12 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
 
                     return data.children.length;
                 });
+        },
+        getMoreMessages: function () {
+            return $.when(
+                RedditService.getInboxMessages({ limit: 100, after: lastMessages.inbox }),
+                RedditService.getSentMessages({ limit: 100, after: lastMessages.sent })
+            ).then(processMessages);
         }
     });
 }]);

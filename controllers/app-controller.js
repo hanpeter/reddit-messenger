@@ -1,5 +1,5 @@
-App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'ThreadFactoryService', 'NotificationService', 'StorageService',
-    function ($scope, RedditService, RedditConfig, ThreadFactoryService, NotificationService, StorageService) {
+App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryService', 'NotificationService', 'StorageService',
+    function ($scope, RedditService, ThreadFactoryService, NotificationService, StorageService) {
         var config = undefined;
         var checkTimeoutID = undefined;
         var refreshTimeoutID = undefined;
@@ -43,6 +43,16 @@ App.controller('AppController', ['$scope', 'RedditService', 'RedditConfig', 'Thr
                 var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
 
                 ThreadFactoryService.updateThreads().done(function (threads) {
+                    $scope.sync(function () {
+                        $scope.messages = threads;
+                        $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
+                    });
+                });
+            },
+            moreMessages: function () {
+                var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
+
+                ThreadFactoryService.getMoreMessages().done(function (threads) {
                     $scope.sync(function () {
                         $scope.messages = threads;
                         $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
