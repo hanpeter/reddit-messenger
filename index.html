@@ -184,10 +184,10 @@
                                     Fetch Message Count
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" id="messageCount" class="form-control" min="25" max="100" step="1" />
+                                    <input type="number" id="messageCount" class="form-control" min="25" max="100" step="1" ng-model="messageCount" ng-blur="updateConfig()" />
                                     <span class="input-group-addon">messages</span>
                                 </div>
-                                <span class="help-block">Each refresh and check will grab 25 messages.</span>
+                                <span class="help-block">Each refresh and check will grab {{messageCount}} messages.</span>
                             </div>
                         </form>
                     </div>

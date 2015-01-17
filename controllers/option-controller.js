@@ -20,11 +20,13 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
             }
             $scope.updateConfig();
         },
+        messageCount: 100,
         isUpdating: false,
         updateConfig: function () {
             StorageService.saveConfigs({
                 refreshInterval: $scope.refreshInterval,
-                checkInterval: $scope.checkInterval
+                checkInterval: $scope.checkInterval,
+                messageCount: $scope.messageCount
             }).done(function () {
                 $scope.sync(function () {
                     $scope.isUpdating = true;
@@ -42,5 +44,6 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
     StorageService.loadConfigs().done(function (config) {
         $scope.refreshInterval = config.refreshInterval;
         $scope.checkInterval = config.checkInterval;
+        $scope.messageCount = config.messageCount;
     });
 }]);

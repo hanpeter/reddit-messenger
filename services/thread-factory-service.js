@@ -1,4 +1,4 @@
-App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', function ($sce, RedditService, RedditConfig) {
+App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', 'StorageService', function ($sce, RedditService, RedditConfig, StorageService) {
     var me = this,
         lastMessages = {
             inbox: undefined,
@@ -92,10 +92,12 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
             }
         },
         updateThreads: function () {
-            return $.when(
-                RedditService.getInboxMessages({ limit: 100 }),
-                RedditService.getSentMessages({ limit: 100 })
-            ).then(processMessages);
+            return StorageService.loadConfigs().then(function (config) {
+                return  $.when(
+                    RedditService.getInboxMessages({ limit: config.messageCount }),
+                    RedditService.getSentMessages({ limit: config.messageCount })
+                ).then(processMessages);
+            });
         },
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()
@@ -108,10 +110,12 @@ App.service('ThreadFactoryService', ['$sce', 'RedditService', 'RedditConfig', fu
                 });
         },
         getMoreMessages: function () {
-            return $.when(
-                RedditService.getInboxMessages({ limit: 100, after: lastMessages.inbox }),
-                RedditService.getSentMessages({ limit: 100, after: lastMessages.sent })
-            ).then(processMessages);
+            return StorageService.loadConfigs().then(function (config) {
+                return $.when(
+                    RedditService.getInboxMessages({ limit: config.messageCount, after: lastMessages.inbox }),
+                    RedditService.getSentMessages({ limit: config.messageCount, after: lastMessages.sent })
+                ).then(processMessages);
+            });
         }
     });
 }]);

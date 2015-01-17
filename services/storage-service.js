@@ -3,6 +3,7 @@ App.service('StorageService', function () {
             config = {
                 refreshInterval: 30,
                 checkInterval: 5,
+                messageCount: 100,
                 winWidth: 800,
                 winHeight: 600
             }
@@ -21,6 +22,7 @@ App.service('StorageService', function () {
                         }
                         else {
                             _.extend(config, data);
+                            isLoaded = true;
                             promise.resolve(config);
                         }
                     });
@@ -37,6 +39,7 @@ App.service('StorageService', function () {
                         promise.reject(chrome.runtime.lastError);
                     }
                     else {
+                        isLoaded = false;
                         promise.resolve.apply(promise, arguments);
                     }
                 });
@@ -51,6 +54,7 @@ App.service('StorageService', function () {
                         promise.reject(chrome.runtime.lastError);
                     }
                     else {
+                        isLoaded = false;
                         promise.resolve.apply(promise, arguments);
                     }
                 });
