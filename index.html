@@ -26,7 +26,6 @@
 
         <!-- Controllers -->
         <script src="/controllers/app-controller.js"></script>
-        <script src="/controllers/thread-controller.js"></script>
         <script src="/controllers/message-controller.js"></script>
         <script src="/controllers/option-controller.js"></script>
 
@@ -111,7 +110,7 @@
                 </button>
             </div>
             <div class="col-sm-3">
-                <ul class="nav nav-pills nav-stacked threads" ng-controller="ThreadController">
+                <ul class="nav nav-pills nav-stacked threads">
                     <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
                         <a ng-href="" ng-click="setActiveThread(thread)">
                             <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
