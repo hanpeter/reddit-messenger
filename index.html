@@ -170,7 +170,7 @@
                             <label for="message" class="control-label">Message</label>
                             <textarea id="message" class="form-control" ng-model="message"></textarea>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{ 'has-error': hasCaptchaError }">
                             <label for="captcha" class="control-label">
                                 Are you human? <small>(Sorry)</small>
                             </label>
@@ -178,6 +178,7 @@
                                 <img id="captchaImg" ng-src="{{captchaSrc}}" ng-show="!!captchaSrc" />
                             </div>
                             <input type="text" name="" id="captcha" class="form-control" ng-model="captcha" ng-disabled="!captchaSrc" />
+                            <span class="help-block" ng-show="hasCaptchaError">Care to try these again?</span>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary pull-right" ng-disabled="!to || !subject || !message || !captcha || isSending">

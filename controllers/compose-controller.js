@@ -15,6 +15,20 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
         });
     }
 
+    function reset() {
+        $scope.to = '';
+        $scope.subject = '';
+        $scope.message = '';
+        $scope.captcha = '';
+        $scope.hasCaptchaError = false;
+
+        resetCaptcha().done(function () {
+            $scope.sync(function () {
+                $scope.isSending = false;
+            });
+        });
+    }
+
     _.extend($scope, {
         to: '',
         subject: '',
@@ -23,6 +37,7 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
         captcha: '',
         captchaIden: null,
         isSending: false,
+        hasCaptchaError: false,
         compose: function () {
             $scope.isSending = true;
 
@@ -38,20 +53,22 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
                 text: $scope.message,
                 to: $scope.to
             }
-            RedditService.postNewMessage(config).done(function () {
-                $scope.sync(function () {
-                    $scope.to = '';
-                    $scope.subject = '';
-                    $scope.message = '';
-                    $scope.captcha = '';
-
-                    resetCaptcha().done(function () {
+            RedditService.postNewMessage(config)
+                .done(function () {
+                    $scope.sync(reset);
+                })
+                .fail(function (data) {
+                    RedditService.getCaptcha(data.iden).done(function (data) {
                         $scope.sync(function () {
+                            $scope.captchaIden = data.iden;
+                            $scope.captchaSrc = data.imgSrc;
+                            $scope.captcha = '';
+
                             $scope.isSending = false;
+                            $scope.hasCaptchaError = true;
                         });
                     });
                 });
-            });
         }
     });
 
@@ -60,6 +77,6 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
             return;
         }
 
-        resetCaptcha();
+        reset();
     });
 }]);

@@ -122,6 +122,32 @@ App.constant('RedditConfig', {
             });
         }
 
+        function getCaptchaImage(iden) {
+            var promise = $.Deferred();
+
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        prevCaptchaObjectUrl = window.URL.createObjectURL(xhr.response);
+                        promise.resolve({
+                            iden: iden,
+                            imgSrc: prevCaptchaObjectUrl
+                        });
+                    }
+                    else {
+                        promise.reject();
+                    }
+                }
+            }
+            xhr.responseType = 'blob';
+            xhr.open('GET', 'https://oauth.reddit.com/captcha/' + iden, true);
+            xhr.setRequestHeader('Authorization', 'bearer ' + RedditConfig.accessToken);
+            xhr.send();
+
+            return promise;
+        }
+
         _.extend(me, {
             getToken: function () {
                 if (chrome.runtime.id !== 'dbdabkkhkmahpcihjdkacnkbofblmgcp') {
@@ -220,49 +246,30 @@ App.constant('RedditConfig', {
                     return data.json.data.things;
                 });
             },
-            getCaptcha: function () {
-                var iden;
-
+            getCaptcha: function (iden) {
                 if (!!prevCaptchaObjectUrl) {
                     window.URL.revokeObjectURL(prevCaptchaObjectUrl);
                 }
 
-                return $.ajax({
-                    url: 'https://oauth.reddit.com/api/new_captcha',
-                    type: 'POST',
-                    headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
-                    },
-                    data: {
-                        api_type: 'json'
-                    }
-                }).then(function (data) {
-                    var promise = $.Deferred();
-                    iden = data.json.data.iden;
-
-                    var xhr = new XMLHttpRequest();
-                    xhr.onload = function () {
-                        if (xhr.readyState === 4) {
-                            if (xhr.status === 200) {
-                                prevCaptchaObjectUrl = window.URL.createObjectURL(xhr.response);
-                                promise.resolve({
-                                    iden: iden,
-                                    rawUrl: 'https://oauth.reddit.com/captcha/' + iden,
-                                    imgSrc: prevCaptchaObjectUrl
-                                });
-                            }
-                            else {
-                                promise.reject();
-                            }
+                if (!!iden) {
+                    // No identity provided, get one then get the image
+                    return $.ajax({
+                        url: 'https://oauth.reddit.com/api/new_captcha',
+                        type: 'POST',
+                        headers: {
+                            Authorization: 'bearer ' + RedditConfig.accessToken
+                        },
+                        data: {
+                            api_type: 'json'
                         }
-                    }
-                    xhr.responseType = 'blob';
-                    xhr.open('GET', 'https://oauth.reddit.com/captcha/' + iden, true);
-                    xhr.setRequestHeader('Authorization', 'bearer ' + RedditConfig.accessToken);
-                    xhr.send();
-
-                    return promise;
-                });
+                    }).then(function (data) {
+                        return getCaptchaImage(data.json.data.iden);
+                    });
+                }
+                else {
+                    // Use the provided identity to get the image
+                    return getCaptchaImage(iden);
+                }
             },
             postNewMessage: function (config) {
                 return $.ajax({
@@ -274,7 +281,20 @@ App.constant('RedditConfig', {
                     data: _.extend({
                         api_type: 'json'
                     }, config)
-                });
+                }).then(function (data) {
+                    var promise = $.Deferred();
+
+                    if (data.json.errors.length > 0) {
+                        promise.reject({
+                            iden: data.json.captcha
+                        });
+                    }
+                    else {
+                        promise.resolve();
+                    }
+
+                    return promise;
+                })
             }
         });
     }]);
