@@ -263,6 +263,18 @@ App.constant('RedditConfig', {
 
                     return promise;
                 });
+            },
+            postNewMessage: function (config) {
+                return $.ajax({
+                    url: 'https://oauth.reddit.com/api/compose',
+                    type: 'POST',
+                    headers: {
+                        Authorization: 'bearer ' + RedditConfig.accessToken
+                    },
+                    data: _.extend({
+                        api_type: 'json'
+                    }, config)
+                });
             }
         });
     }]);

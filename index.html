@@ -155,10 +155,10 @@
                     </div>
                 </div>
                 <div ng-show="isComposing" ng-controller="ComposeController">
-                    <form class="compose-form" role="form" ng-submit="" ng-keypress="">
+                    <form class="compose-form" role="form" ng-submit="compose()">
                         <div class="form-group">
                             <label for="to" class="control-label">
-                                To <small>(username, or /r/name for that subreddit's mods)</small>
+                                To
                             </label>
                             <input type="text" id="to" class="form-control" ng-model="to" />
                         </div>
@@ -180,7 +180,7 @@
                             <input type="text" name="" id="captcha" class="form-control" ng-model="captcha" ng-disabled="!captchaSrc" />
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!to || !subject || !message || !captcha">
+                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!to || !subject || !message || !captcha || isSending">
                                 <span class="glyphicon glyphicon-send"></span>
                                 <span class="button-text">Send</span>
                             </button>
