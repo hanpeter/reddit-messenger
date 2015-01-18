@@ -14,6 +14,7 @@
 
         <!-- App -->
         <script src="/app.js"></script>
+        <link rel="stylesheet" href="/app.css" type="text/css" />
 
         <!-- Services -->
         <script src="/services/reddit-service.js"></script>
@@ -31,74 +32,7 @@
         <script src="/controllers/option-controller.js"></script>
 
         <style>
-            .bg-primary > .media-heading > small,
-            .form-group > .control-label > small {
-                color: #CCCCCC;
-            }
-            .btn > .button-text {
-                display: none;
-            }
-
-            .reply-form,
-            .compose-form,
-            .menu {
-                margin-top: 10px;
-                margin-bottom: 10px;
-            }
-
-            .menu > .btn {
-                margin-left: 5px;
-                margin-right: 5px;
-            }
-            .menu > .btn:first-child {
-                margin-right: 0;
-            }
-
-            .modal {
-                overflow-y: auto;
-            }
-
-            .compose-form #captchaImg {
-                border: 1px solid #737373;
-                padding: 3px;
-            }
-
-            @media (min-width: 768px) {
-                .threads {
-                    position: fixed;
-                    top: 10px;
-                    bottom: 10px;
-                    width: 150px;
-                    overflow-y: auto;
-                    overflow-x: hidden;
-                }
-                ul.threads > li {
-                    margin-right: 10px;
-                }
-                html {
-                    overflow-y: auto;
-                }
-
-                .btn > .button-text {
-                    display: inline;
-                }
-
-                .menu {
-                    margin-bottom: 0;
-                }
-            }
-
-            @media (min-width: 992px) {
-                .threads {
-                    width: 200px;
-                }
-            }
-
-            @media (min-width: 1200px) {
-                .threads {
-                    width: 250px;
-                }
-            }
+            
         </style>
     </head>
     <body class="container" ng-controller="AppController">
