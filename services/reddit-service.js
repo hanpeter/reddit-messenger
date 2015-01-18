@@ -4,7 +4,8 @@ App.constant('RedditConfig', {
         redirectUri: 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'
     })
     .service('RedditService', ['RedditConfig', function (RedditConfig) {
-        var me = this;
+        var me = this,
+            prevCaptchaObjectUrl = null;
 
         function generateURL(baseUrl, params) {
             return baseUrl + '?' + _.reduce(_.map(params, function (value, key) { return key + '=' + value; }), function (memo, value) { return memo + '&' + value; });
@@ -217,6 +218,50 @@ App.constant('RedditConfig', {
                     }
                 }).then(function (data) {
                     return data.json.data.things;
+                });
+            },
+            getCaptcha: function () {
+                var iden;
+
+                if (!!prevCaptchaObjectUrl) {
+                    window.URL.revokeObjectURL(prevCaptchaObjectUrl);
+                }
+
+                return $.ajax({
+                    url: 'https://oauth.reddit.com/api/new_captcha',
+                    type: 'POST',
+                    headers: {
+                        Authorization: 'bearer ' + RedditConfig.accessToken
+                    },
+                    data: {
+                        api_type: 'json'
+                    }
+                }).then(function (data) {
+                    var promise = $.Deferred();
+                    iden = data.json.data.iden;
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.onload = function () {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                prevCaptchaObjectUrl = window.URL.createObjectURL(xhr.response);
+                                promise.resolve({
+                                    iden: iden,
+                                    rawUrl: 'https://oauth.reddit.com/captcha/' + iden,
+                                    imgSrc: prevCaptchaObjectUrl
+                                });
+                            }
+                            else {
+                                promise.reject();
+                            }
+                        }
+                    }
+                    xhr.responseType = 'blob';
+                    xhr.open('GET', 'https://oauth.reddit.com/captcha/' + iden, true);
+                    xhr.setRequestHeader('Authorization', 'bearer ' + RedditConfig.accessToken);
+                    xhr.send();
+
+                    return promise;
                 });
             }
         });

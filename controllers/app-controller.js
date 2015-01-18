@@ -28,6 +28,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
         _.extend($scope, {
             messages: ThreadFactoryService.getThreads(),
             activeThread: null,
+            isComposing: false,
             sync: function (callback) {
                 if ($scope.$$phase) {
                     callback();
@@ -38,6 +39,12 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
             },
             setActiveThread: function (thread) {
                 $scope.activeThread = thread;
+                $scope.isComposing = false;
+            },
+            startNewThread: function () {
+                $scope.setActiveThread(null);
+                $scope.isComposing = true;
+                $scope.$emit('startComposing', {});
             },
             updateMessages: function () {
                 var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;

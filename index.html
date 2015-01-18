@@ -27,17 +27,20 @@
         <!-- Controllers -->
         <script src="/controllers/app-controller.js"></script>
         <script src="/controllers/message-controller.js"></script>
+        <script src="/controllers/compose-controller.js"></script>
         <script src="/controllers/option-controller.js"></script>
 
         <style>
-            .bg-primary > h4.media-heading > small {
+            .bg-primary > .media-heading > small,
+            .form-group > .control-label > small {
                 color: #CCCCCC;
             }
             .btn > .button-text {
                 display: none;
             }
 
-            .replyForm,
+            .reply-form,
+            .compose-form,
             .menu {
                 margin-top: 10px;
                 margin-bottom: 10px;
@@ -53,6 +56,11 @@
 
             .modal {
                 overflow-y: auto;
+            }
+
+            .compose-form #captchaImg {
+                border: 1px solid #737373;
+                padding: 3px;
             }
 
             @media (min-width: 768px) {
@@ -118,11 +126,17 @@
                             with {{thread.dest}}
                         </a>
                     </li>
+                    <li ng-class="{ active: isComposing }">
+                        <a hg-href="" ng-click="startNewThread()">
+                            <h4>Compose</h4>
+                            with a new user
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="col-sm-9">
-                <div class="messages" ng-controller="MessageController">
-                    <form class="replyForm" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="$event.keyCode === 10 && reply()">
+                <div class="messages" ng-controller="MessageController" ng-hide="isComposing">
+                    <form class="reply-form" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="$event.keyCode === 10 && reply()">
                         <div class="form-group">
                             <textarea class="form-control" rows="3" ng-model="activeThread.replyMsg"></textarea>
                         </div>
@@ -139,6 +153,39 @@
                             <div ng-bind-html="msg.body"></div>
                         </div>
                     </div>
+                </div>
+                <div ng-show="isComposing" ng-controller="ComposeController">
+                    <form class="compose-form" role="form" ng-submit="" ng-keypress="">
+                        <div class="form-group">
+                            <label for="to" class="control-label">
+                                To <small>(username, or /r/name for that subreddit's mods)</small>
+                            </label>
+                            <input type="text" id="to" class="form-control" ng-model="to" />
+                        </div>
+                        <div class="form-group">
+                            <label for="subject" class="control-label">Subject</label>
+                            <input type="text" id="subject" class="form-control" ng-model="subject" />
+                        </div>
+                        <div class="form-group">
+                            <label for="message" class="control-label">Message</label>
+                            <textarea id="message" class="form-control" ng-model="message"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="captcha" class="control-label">
+                                Are you human? <small>(Sorry)</small>
+                            </label>
+                            <div class="help-block">
+                                <img id="captchaImg" ng-src="{{captchaSrc}}" ng-show="!!captchaSrc" />
+                            </div>
+                            <input type="text" name="" id="captcha" class="form-control" ng-model="captcha" ng-disabled="!captchaSrc" />
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary pull-right" ng-disabled="!to || !subject || !message || !captcha">
+                                <span class="glyphicon glyphicon-send"></span>
+                                <span class="button-text">Send</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
