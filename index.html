@@ -112,7 +112,7 @@
             <div class="col-sm-3">
                 <ul class="nav nav-pills nav-stacked threads">
                     <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
-                        <a ng-href="" ng-click="setActiveThread(thread)">
+                        <a href="" ng-click="setActiveThread(thread)">
                             <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
                             <h4>{{thread.subject}}</h4>
                             with {{thread.dest}}
