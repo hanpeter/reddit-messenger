@@ -1,5 +1,5 @@
-App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryService', 'NotificationService', 'StorageService',
-    function ($scope, RedditService, ThreadFactoryService, NotificationService, StorageService) {
+App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactoryService', 'NotificationService', 'StorageService',
+    function ($scope, $q, RedditService, ThreadFactoryService, NotificationService, StorageService) {
         var config = undefined;
         var checkTimeoutID = undefined;
         var refreshTimeoutID = undefined;
@@ -7,7 +7,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
         function checkUnreadMessages() {
             $scope.sync(function () {
                 ThreadFactoryService.checkUnreadMessages()
-                    .done(NotificationService.update);
+                    .then(NotificationService.update);
             });
 
             if (config.checkInterval > 0) {
@@ -49,7 +49,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
             updateMessages: function () {
                 var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
 
-                ThreadFactoryService.updateThreads().done(function (threads) {
+                ThreadFactoryService.updateThreads().then(function (threads) {
                     $scope.sync(function () {
                         $scope.messages = threads;
                         $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
@@ -59,7 +59,7 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
             moreMessages: function () {
                 var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
 
-                ThreadFactoryService.getMoreMessages().done(function (threads) {
+                ThreadFactoryService.getMoreMessages().then(function (threads) {
                     $scope.sync(function () {
                         $scope.messages = threads;
                         $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
@@ -78,11 +78,11 @@ App.controller('AppController', ['$scope', 'RedditService', 'ThreadFactoryServic
             }
         });
 
-        $.when(
+        $q.all([
             StorageService.loadConfigs(),
             RedditService.getToken()
-        ).done(function (c) {
-            config = c;
+        ]).then(function (resps) {
+            config = resps[0];
 
             autoRefreshMessages();
             checkUnreadMessages();

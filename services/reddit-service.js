@@ -3,7 +3,7 @@ App.constant('RedditConfig', {
         scope: 'privatemessages,identity,submit',
         redirectUri: 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'
     })
-    .service('RedditService', ['RedditConfig', function (RedditConfig) {
+    .service('RedditService', ['RedditConfig', '$http', '$q', function (RedditConfig, $http, $q) {
         var me = this,
             prevCaptchaObjectUrl = null;
 
@@ -42,110 +42,113 @@ App.constant('RedditConfig', {
                 options = {
                     interactive: true,
                     url: generateURL('https://ssl.reddit.com/api/v1/authorize', params)
-                }
-                promise = $.Deferred();
+                },
+                deferred = $q.defer();
 
             chrome.identity.launchWebAuthFlow(options, function (rUri) {
                 if (!rUri) {
-                    promise.reject('Invalid redirectUri', rUri);
+                    deferred.reject('Invalid redirectUri', rUri);
                 }
 
                 var parser = $('<a></a>').attr('href', rUri)[0],
                     query = parseQueryString(parser.search.substr(1));
 
                 if (chrome.runtime.lastError) {
-                    promise.reject(chrome.runtime.lastError);
+                    deferred.reject(chrome.runtime.lastError);
                 }
 
                 if (query.state !== state) {
-                    promise.reject('Invalid state');
+                    deferred.reject('Invalid state');
                 }
 
                 if (!query.code) {
-                    promise.reject('Invalid code');
+                    deferred.reject('Invalid code');
                 }
 
-                promise.resolve(query.code);
+                deferred.resolve(query.code);
             });
 
-            return promise;
+            return deferred.promise;
         }
 
         function getAccessToken(oauthCode) {
-            return $.ajax({
+            return $http({
                 url: 'https://ssl.reddit.com/api/v1/access_token',
-                type: 'POST',
+                method: 'POST',
                 headers: {
-                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':')
+                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':'),
+                    'Content-type': 'application/x-www-form-urlencoded'
                 },
-                data: {
+                data: $.param({
                     grant_type: 'authorization_code',
                     code: oauthCode,
                     redirect_uri: RedditConfig.redirectUri
-                }
-            }).then(function (data) {
-                RedditConfig.accessToken = data.access_token;
-                RedditConfig.refreshToken = data.refresh_token;
+                })
+            }).then(function (resp) {
+                RedditConfig.accessToken = resp.data.access_token;
+                RedditConfig.refreshToken = resp.data.refresh_token;
 
-                return data.expires_in * 1000;
+                return resp.data.expires_in * 1000;
             });
         }
 
         function refreshAccessToken() {
-            return $.ajax({
+            return $http({
                 url: 'https://ssl.reddit.com/api/v1/access_token',
-                type: 'POST',
+                method: 'POST',
                 headers: {
-                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':')
+                    Authorization: 'Basic ' + window.btoa(RedditConfig.clientID + ':'),
+                    'Content-type': 'application/x-www-form-urlencoded'
                 },
-                data: {
+                data: $.param({
                     grant_type: 'refresh_token',
                     refresh_token: RedditConfig.refreshToken
-                }
-            }).then(function (data) {
-                RedditConfig.accessToken = data.access_token;
+                })
+            }).then(function (resp) {
+                RedditConfig.accessToken = resp.data.access_token;
 
-                setTimeout(refreshAccessToken, data.expires_in * 1000);
+                setTimeout(refreshAccessToken, resp.data.expires_in * 1000);
             });
         }
 
         function getUserInfo() {
-            return $.ajax({
+            return $http({
                 url: 'https://oauth.reddit.com/api/v1/me',
-                type: 'GET',
+                method: 'GET',
                 headers: {
-                    Authorization: 'bearer ' + RedditConfig.accessToken
+                    Authorization: 'bearer ' + RedditConfig.accessToken,
+                    'Content-type': 'application/x-www-form-urlencoded'
                 }
-            }).then(function (data) {
-                RedditConfig.username = data.name;
-                RedditConfig.userID = data.id;
+            }).then(function (resp) {
+                RedditConfig.username = resp.data.name;
+                RedditConfig.userID = resp.data.id;
             });
         }
 
         function getCaptchaImage(iden) {
-            var promise = $.Deferred();
+            deferred = $q.defer();
 
             var xhr = new XMLHttpRequest();
             xhr.onload = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         prevCaptchaObjectUrl = window.URL.createObjectURL(xhr.response);
-                        promise.resolve({
+                        deferred.resolve({
                             iden: iden,
                             imgSrc: prevCaptchaObjectUrl
                         });
                     }
                     else {
-                        promise.reject();
+                        deferred.reject();
                     }
                 }
-            }
+            };
             xhr.responseType = 'blob';
             xhr.open('GET', 'https://oauth.reddit.com/captcha/' + iden, true);
             xhr.setRequestHeader('Authorization', 'bearer ' + RedditConfig.accessToken);
             xhr.send();
 
-            return promise;
+            return deferred.promise;
         }
 
         _.extend(me, {
@@ -156,94 +159,100 @@ App.constant('RedditConfig', {
 
                 return getOAuthToken()
                     .then(getAccessToken)
-                    .then(getUserInfo)
                     .then(function (expirationTime) {
                         setTimeout(refreshAccessToken, expirationTime);
-                    });
+                    })
+                    .then(getUserInfo);
             },
             getInboxMessages: function (config) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/message/inbox',
-                    type: 'GET',
+                    method: 'GET',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: _.extend({
+                    params: _.extend({
                         mark: false,
                         limit: 25
                     }, config)
-                }).then(function (data) {
-                    return data.data;
+                }).then(function (resp) {
+                    return resp.data.data;
                 });
             },
             getUnreadMessages: function (config) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/message/unread',
-                    type: 'GET',
+                    method: 'GET',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: _.extend({
+                    params: _.extend({
                         mark: false,
                         limit: 25
                     }, config)
-                }).then(function (data) {
-                    return data.data;
+                }).then(function (resp) {
+                    return resp.data.data;
                 });
             },
             getSentMessages: function (config) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/message/sent',
-                    type: 'GET',
+                    method: 'GET',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: _.extend({
+                    params: _.extend({
                         mark: false,
                         limit: 25
                     }, config)
-                }).then(function (data) {
-                    return data.data;
+                }).then(function (resp) {
+                    return resp.data.data;
                 });
             },
             markMessageAsRead: function (messageID) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/api/read_message',
-                    type: 'POST',
+                    method: 'POST',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: {
+                    data: $.param({
                         id: messageID
-                    }
+                    })
                 });
             },
             markMessageAsUnread: function (messageID) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/api/unread_message',
-                    type: 'POST',
+                    method: 'POST',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: {
+                    data: $.param({
                         id: messageID
-                    }
+                    })
                 });
             },
             postReplyMessage: function (replyToID, messageText) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/api/comment',
-                    type: 'POST',
+                    method: 'POST',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: {
+                    data: $.param({
                         api_type: 'json',
                         text: messageText,
                         thing_id: replyToID
-                    }
-                }).then(function (data) {
-                    return data.json.data.things;
+                    })
+                }).then(function (resp) {
+                    return resp.data.json.data.things;
                 });
             },
             getCaptcha: function (iden) {
@@ -253,17 +262,18 @@ App.constant('RedditConfig', {
 
                 if (!!iden) {
                     // No identity provided, get one then get the image
-                    return $.ajax({
+                    return $http({
                         url: 'https://oauth.reddit.com/api/new_captcha',
-                        type: 'POST',
+                        method: 'POST',
                         headers: {
-                            Authorization: 'bearer ' + RedditConfig.accessToken
+                            Authorization: 'bearer ' + RedditConfig.accessToken,
+                            'Content-type': 'application/x-www-form-urlencoded'
                         },
-                        data: {
+                        data: $.param({
                             api_type: 'json'
-                        }
-                    }).then(function (data) {
-                        return getCaptchaImage(data.json.data.iden);
+                        })
+                    }).then(function (resp) {
+                        return getCaptchaImage(resp.data.json.data.iden);
                     });
                 }
                 else {
@@ -272,29 +282,30 @@ App.constant('RedditConfig', {
                 }
             },
             postNewMessage: function (config) {
-                return $.ajax({
+                return $http({
                     url: 'https://oauth.reddit.com/api/compose',
-                    type: 'POST',
+                    method: 'POST',
                     headers: {
-                        Authorization: 'bearer ' + RedditConfig.accessToken
+                        Authorization: 'bearer ' + RedditConfig.accessToken,
+                        'Content-type': 'application/x-www-form-urlencoded'
                     },
-                    data: _.extend({
+                    data: $.param(_.extend({
                         api_type: 'json'
-                    }, config)
-                }).then(function (data) {
-                    var promise = $.Deferred();
+                    }, config))
+                }).then(function (resp) {
+                    deferred = $q.defer();
 
-                    if (data.json.errors.length > 0) {
-                        promise.reject({
-                            iden: data.json.captcha
+                    if (resp.data.json.errors.length > 0) {
+                        deferred.reject({
+                            iden: resp.data.json.captcha
                         });
                     }
                     else {
-                        promise.resolve();
+                        deferred.resolve();
                     }
 
-                    return promise;
-                })
+                    return deferred.promise;
+                });
             }
         });
     }]);

@@ -41,7 +41,7 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
         }
     });
 
-    StorageService.loadConfigs().done(function (config) {
+    StorageService.loadConfigs().then(function (config) {
         $scope.refreshInterval = config.refreshInterval;
         $scope.checkInterval = config.checkInterval;
         $scope.messageCount = config.messageCount;
