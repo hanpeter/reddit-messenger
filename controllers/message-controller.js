@@ -45,16 +45,14 @@ App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactorySe
             }
 
             RedditService.postReplyMessage(replyTo.id, $scope.activeThread.replyMsg)
-                .done(function (messages) {
-                    $scope.sync(function () {
-                        $scope.activeThread.replyMsg = '';
+                .then(function (messages) {
+                    $scope.activeThread.replyMsg = '';
 
-                        _.each(_.pluck(messages, 'data'), function (value) {
-                            ThreadFactoryService.saveMessage(value);
-                        });
-
-                        $scope.isReplying = false;
+                    _.each(_.pluck(messages, 'data'), function (value) {
+                        ThreadFactoryService.saveMessage(value);
                     });
+
+                    $scope.isReplying = false;
                 });
         }
     });
