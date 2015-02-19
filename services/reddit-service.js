@@ -156,9 +156,9 @@ App.constant('RedditConfig', {
 
                 return getOAuthToken()
                     .then(getAccessToken)
+                    .then(getUserInfo)
                     .then(function (expirationTime) {
                         setTimeout(refreshAccessToken, expirationTime);
-                        getUserInfo();
                     });
             },
             getInboxMessages: function (config) {
