@@ -47,24 +47,10 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
                 $scope.$emit('startComposing', {});
             },
             updateMessages: function () {
-                var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
-
-                ThreadFactoryService.updateThreads().then(function (threads) {
-                    $scope.sync(function () {
-                        $scope.messages = threads;
-                        $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
-                    });
-                });
+                ThreadFactoryService.updateThreads();
             },
             moreMessages: function () {
-                var activeThreadID = $scope.activeThread ? $scope.activeThread.threadID : undefined;
-
-                ThreadFactoryService.getMoreMessages().then(function (threads) {
-                    $scope.sync(function () {
-                        $scope.messages = threads;
-                        $scope.activeThread = _.find(threads, function (thread) { return thread.threadID === activeThreadID; });
-                    });
-                });
+                ThreadFactoryService.getMoreMessages();
             },
             resetTimeout: function () {
                 if (config.checkInterval > 0) {

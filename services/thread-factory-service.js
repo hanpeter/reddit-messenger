@@ -98,8 +98,9 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
                 return  $q.all([
                     RedditService.getInboxMessages({ limit: config.messageCount }),
                     RedditService.getSentMessages({ limit: config.messageCount })
-                ]).then(processMessages);
-            });
+                ]);
+            })
+            .then(processMessages);
         },
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()
@@ -116,8 +117,9 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
                 return $q.all([
                     RedditService.getInboxMessages({ limit: config.messageCount, after: lastMessages.inbox }),
                     RedditService.getSentMessages({ limit: config.messageCount, after: lastMessages.sent })
-                ]).then(processMessages);
-            });
+                ]);
+            })
+            .then(processMessages);
         }
     });
 }]);
