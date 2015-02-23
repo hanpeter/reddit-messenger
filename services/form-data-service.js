@@ -1,4 +1,4 @@
-App.service('FormDataService', [function ($q, RedditConfig) {
+App.service('FormDataService', [function () {
     var me = this;
 
    _.extend(me, {
