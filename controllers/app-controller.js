@@ -1,8 +1,8 @@
 App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactoryService', 'NotificationService', 'StorageService',
     function ($scope, $q, RedditService, ThreadFactoryService, NotificationService, StorageService) {
-        var config = undefined;
-        var checkTimeoutID = undefined;
-        var refreshTimeoutID = undefined;
+        var config = null;
+        var checkTimeoutID = null;
+        var refreshTimeoutID = null;
 
         function checkUnreadMessages() {
             $scope.sync(function () {
@@ -66,7 +66,7 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
 
         $q.all([
             StorageService.loadConfigs(),
-            RedditService.getToken()
+            RedditService.getUserInfo()
         ]).then(function (resps) {
             config = resps[0];
 
