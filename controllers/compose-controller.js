@@ -1,17 +1,15 @@
-App.controller('ComposeController', ['$scope', 'RedditService', function ($scope, RedditService) {
+App.controller('ComposeController', ['$scope', '$q', 'RedditService', function ($scope, $q, RedditService) {
     function resetCaptcha() {
         $scope.captchaSrc = null;
         return RedditService.getCaptcha().then(function (data) {
-            var promise = $.Deferred();
+            var deferred = $q.defer();
 
-            $scope.sync(function () {
-                $scope.captchaIden = data.iden;
-                $scope.captchaSrc = data.imgSrc;
+            $scope.captchaIden = data.iden;
+            $scope.captchaSrc = data.imgSrc;
 
-                promise.resolve();
-            });
+            deferred.resolve();
 
-            return promise;
+            return deferred.promise;
         });
     }
 
@@ -22,10 +20,8 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
         $scope.captcha = '';
         $scope.hasCaptchaError = false;
 
-        resetCaptcha().done(function () {
-            $scope.sync(function () {
-                $scope.isSending = false;
-            });
+        resetCaptcha().then(function () {
+            $scope.isSending = false;
         });
     }
 
@@ -54,19 +50,17 @@ App.controller('ComposeController', ['$scope', 'RedditService', function ($scope
                 to: $scope.to
             }
             RedditService.postNewMessage(config)
-                .done(function () {
-                    $scope.sync(reset);
+                .then(function () {
+                    reset();
                 })
-                .fail(function (data) {
-                    RedditService.getCaptcha(data.iden).done(function (data) {
-                        $scope.sync(function () {
-                            $scope.captchaIden = data.iden;
-                            $scope.captchaSrc = data.imgSrc;
-                            $scope.captcha = '';
+                .error(function (data) {
+                    RedditService.getCaptcha(data.iden).then(function (data) {
+                        $scope.captchaIden = data.iden;
+                        $scope.captchaSrc = data.imgSrc;
+                        $scope.captcha = '';
 
-                            $scope.isSending = false;
-                            $scope.hasCaptchaError = true;
-                        });
+                        $scope.isSending = false;
+                        $scope.hasCaptchaError = true;
                     });
                 });
         }

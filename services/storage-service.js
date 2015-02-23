@@ -40,7 +40,7 @@ App.service('StorageService', ['$q', function ($q) {
                     }
                     else {
                         isLoaded = false;
-                        deferred.resolve.apply(promise, arguments);
+                        deferred.resolve.apply(deferred, arguments);
                     }
                 });
 
@@ -55,7 +55,7 @@ App.service('StorageService', ['$q', function ($q) {
                     }
                     else {
                         isLoaded = false;
-                        deferred.resolve.apply(promise, arguments);
+                        deferred.resolve.apply(deferred, arguments);
                     }
                 });
 

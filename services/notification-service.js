@@ -1,4 +1,4 @@
-App.service('NotificationService', ['$timeout', 'RedditConfig', function ($timeout, RedditConfig) {
+App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', function ($timeout, $q, RedditConfig) {
     var me = this,
         NOTIFICATION_BUFFER = 15000,
         NOTIFICATION_SNOOZE = 300000;
@@ -13,24 +13,24 @@ App.service('NotificationService', ['$timeout', 'RedditConfig', function ($timeo
         notificationID: '',
         notificationRefreshTime: moment(),
         clear: function () {
-            var promise = $.Deferred();
+            var deferred = $q.defer();
 
             if (moment().isAfter(me.notificationRefreshTime) && !!me.notificationID) {
                 chrome.notifications.clear(me.notificationID, function (wasCleared) {
                     if (wasCleared) {
                         me.notificationID = '';
-                        promise.resolve();
+                        deferred.resolve();
                     }
                     else {
-                        promise.reject();
+                        deferred.reject();
                     }
                 });
             }
             else {
-                promise.resolve();
+                deferred.resolve();
             }
 
-            return promise;
+            return deferred.promise;
         },
         update: function (count) {
             var config = {
