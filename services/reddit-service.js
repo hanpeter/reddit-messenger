@@ -1,9 +1,4 @@
-App.constant('RedditConfig', {
-        clientID: '_OiiEDnIKbwbOg',
-        scope: 'privatemessages,identity,submit',
-        redirectUri: 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb'
-    })
-    .service('RedditService', ['RedditConfig', '$http', '$q', function (RedditConfig, $http, $q) {
+App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditConfig, $http, $q) {
         var me = this,
             prevCaptchaObjectUrl = null;
 
