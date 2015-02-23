@@ -52,8 +52,8 @@ App.controller('ComposeController', ['$scope', '$q', 'RedditService', function (
             RedditService.postNewMessage(config)
                 .then(function () {
                     reset();
-                })
-                .error(function (data) {
+                },
+                function (data) {
                     RedditService.getCaptcha(data.iden).then(function (data) {
                         $scope.captchaIden = data.iden;
                         $scope.captchaSrc = data.imgSrc;
