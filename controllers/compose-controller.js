@@ -1,4 +1,4 @@
-App.controller('ComposeController', ['$scope', '$q', 'RedditService', function ($scope, $q, RedditService) {
+App.controller('ComposeController', ['$scope', '$q', 'RedditService', 'ThreadFactoryService', function ($scope, $q, RedditService, ThreadFactoryService) {
     function resetCaptcha() {
         $scope.captchaSrc = null;
         return RedditService.getCaptcha().then(function (data) {
@@ -50,19 +50,20 @@ App.controller('ComposeController', ['$scope', '$q', 'RedditService', function (
                 to: $scope.to
             };
             RedditService.postNewMessage(config)
-                .then(function () {
-                    reset();
-                },
-                function (data) {
-                    RedditService.getCaptcha(data.iden).then(function (data) {
-                        $scope.captchaIden = data.iden;
-                        $scope.captchaSrc = data.imgSrc;
+                .then(ThreadFactoryService.updateThreads(),
+                function (postData) {
+                    return RedditService.getCaptcha(postData.iden).then(function (captchaData) {
+                        $scope.captchaIden = captchaData.iden;
+                        $scope.captchaSrc = captchaData.imgSrc;
                         $scope.captcha = '';
 
                         $scope.isSending = false;
                         $scope.hasCaptchaError = true;
+
+                        return $q.reject();
                     });
-                });
+                }).
+                then(reset);
         }
     });
 

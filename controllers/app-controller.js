@@ -44,7 +44,6 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
             startNewThread: function () {
                 $scope.setActiveThread(null);
                 $scope.isComposing = true;
-                $scope.$emit('startComposing', {});
             },
             updateMessages: function () {
                 ThreadFactoryService.updateThreads();

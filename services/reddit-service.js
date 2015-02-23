@@ -111,6 +111,10 @@ App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditCon
                 }
 
                 if (!!iden) {
+                    // Use the provided identity to get the image
+                    return getCaptchaImage(iden);
+                }
+                else {
                     // No identity provided, get one then get the image
                     return $http({
                         url: 'https://oauth.reddit.com/api/new_captcha',
@@ -121,10 +125,6 @@ App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditCon
                     }).then(function (resp) {
                         return getCaptchaImage(resp.data.json.data.iden);
                     });
-                }
-                else {
-                    // Use the provided identity to get the image
-                    return getCaptchaImage(iden);
                 }
             },
             postNewMessage: function (config) {
