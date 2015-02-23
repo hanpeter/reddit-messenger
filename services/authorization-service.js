@@ -1,4 +1,4 @@
-App.service('AuthorizationService', ['$q', 'RedditConfig',  function ($q, RedditConfig) {
+App.service('AuthorizationService', ['$q', 'RedditConfig', function ($q, RedditConfig) {
     var me = this,
         expireTime = moment();
 
