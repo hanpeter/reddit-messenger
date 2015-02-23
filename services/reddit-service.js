@@ -78,29 +78,29 @@ App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditCon
                 return $http({
                     url: 'https://oauth.reddit.com/api/read_message',
                     method: 'POST',
-                    data: $.param({
+                    data: {
                         id: messageID
-                    })
+                    }
                 });
             },
             markMessageAsUnread: function (messageID) {
                 return $http({
                     url: 'https://oauth.reddit.com/api/unread_message',
                     method: 'POST',
-                    data: $.param({
+                    data: {
                         id: messageID
-                    })
+                    }
                 });
             },
             postReplyMessage: function (replyToID, messageText) {
                 return $http({
                     url: 'https://oauth.reddit.com/api/comment',
                     method: 'POST',
-                    data: $.param({
+                    data: {
                         api_type: 'json',
                         text: messageText,
                         thing_id: replyToID
-                    })
+                    }
                 }).then(function (resp) {
                     return resp.data.json.data.things;
                 });
@@ -115,9 +115,9 @@ App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditCon
                     return $http({
                         url: 'https://oauth.reddit.com/api/new_captcha',
                         method: 'POST',
-                        data: $.param({
+                        data: {
                             api_type: 'json'
-                        })
+                        }
                     }).then(function (resp) {
                         return getCaptchaImage(resp.data.json.data.iden);
                     });
@@ -131,9 +131,9 @@ App.service('RedditService', ['RedditConfig', '$http', '$q', function (RedditCon
                 return $http({
                     url: 'https://oauth.reddit.com/api/compose',
                     method: 'POST',
-                    data: $.param(_.extend({
+                    data: _.extend({
                         api_type: 'json'
-                    }, config))
+                    }, config)
                 }).then(function (resp) {
                     deferred = $q.defer();
 
