@@ -48,7 +48,7 @@ App.controller('ComposeController', ['$scope', '$q', 'RedditService', function (
                 subject: $scope.subject,
                 text: $scope.message,
                 to: $scope.to
-            }
+            };
             RedditService.postNewMessage(config)
                 .then(function () {
                     reset();
