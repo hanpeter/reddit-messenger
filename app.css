@@ -67,3 +67,8 @@ html {
         width: 250px;
     }
 }
+
+#optionsModal .tab-content .form-horizontal .form-group {
+    margin-left: auto;
+    margin-right: auto;
+}

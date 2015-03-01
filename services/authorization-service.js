@@ -119,20 +119,28 @@ App.service('AuthorizationService', ['$q', 'RedditConfig', function ($q, RedditC
             var deferred = $q.defer();
             var promise = deferred.promise;
 
-            if (!RedditConfig.oauthCode) {
-                promise = promise.then(getOAuthToken);
+            if (config.url.indexOf('https://oauth.reddit.com') > -1) {
+                if (!RedditConfig.oauthCode) {
+                    promise = promise.then(getOAuthToken);
+                }
+
+                if (!RedditConfig.refreshToken) {
+                    promise = promise.then(getAccessToken);
+                }
+                else if (moment().isAfter(expireTime)) {
+                    promise = promise.then(refreshAccessToken);
+                }
+
+                promise = promise.then(function () {
+                    return setAuthorization(config);
+                });
+            }
+            else {
+                promise = promise.then(function () {
+                    return config;
+                });
             }
 
-            if (!RedditConfig.refreshToken) {
-                promise = promise.then(getAccessToken);
-            }
-            else if (moment().isAfter(expireTime)) {
-                promise = promise.then(refreshAccessToken);
-            }
-            
-            promise = promise.then(function () {
-                return setAuthorization(config);
-            });
             deferred.resolve();
 
             return promise;

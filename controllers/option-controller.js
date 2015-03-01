@@ -1,31 +1,42 @@
 App.controller('OptionController', ['$scope', 'StorageService', function ($scope, StorageService) {
     _.extend($scope, {
-        refreshInterval: undefined,
-        toggleRefreshInterval: function () {
-            if ($scope.refreshInterval > 0) {
-                $scope.refreshInterval = 0;
+        unread: {
+            isEnabled: true,
+            interval: 5,
+            modifyEnabled: function (value) {
+                if (!value) {
+                    $scope.unread.interval = 5;
+                }
+                $scope.unread.isEnabled = value;
+                $scope.updateConfig();
             }
-            else {
-                $scope.refreshInterval = 30;
-            }
-            $scope.updateConfig();
         },
-        checkInterval: undefined,
-        toggleCheckInterval: function () {
-            if ($scope.checkInterval > 0) {
-                $scope.checkInterval = 0;
+        refresh: {
+            isEnabled: true,
+            interval: 30,
+            messageCount: 100,
+            modifyEnabled: function (value) {
+                if (!value) {
+                    $scope.refresh.interval = 30;
+                    $scope.refresh.messageCount = 100;
+                }
+                $scope.refresh.isEnabled = value;
+                $scope.updateConfig();
             }
-            else {
-                $scope.checkInterval = 5;
-            }
-            $scope.updateConfig();
         },
-        messageCount: 100,
         updateConfig: function () {
             StorageService.saveConfigs({
-                refreshInterval: $scope.refreshInterval,
-                checkInterval: $scope.checkInterval,
-                messageCount: $scope.messageCount
+                option: {
+                    unread: {
+                        isEnabled: $scope.unread.isEnabled,
+                        interval: $scope.unread.interval
+                    },
+                    refresh: {
+                        isEnabled: $scope.refresh.isEnabled,
+                        interval: $scope.refresh.interval,
+                        messageCount: $scope.refresh.messageCount
+                    }
+                }
             }).then(function () {
                 $scope.sync(function () {
                     $scope.resetTimeout();
@@ -35,8 +46,7 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
     });
 
     StorageService.loadConfigs().then(function (config) {
-        $scope.refreshInterval = config.refreshInterval;
-        $scope.checkInterval = config.checkInterval;
-        $scope.messageCount = config.messageCount;
+        $scope.refresh = _.extend($scope.refresh, config.option.refresh);
+        $scope.unread = _.extend($scope.unread, config.option.unread);
     });
 }]);

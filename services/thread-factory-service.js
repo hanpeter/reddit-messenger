@@ -94,13 +94,14 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
             }
         },
         updateThreads: function () {
-            return StorageService.loadConfigs().then(function (config) {
-                return  $q.all([
-                    RedditService.getInboxMessages({ limit: config.messageCount }),
-                    RedditService.getSentMessages({ limit: config.messageCount })
-                ]);
-            })
-            .then(processMessages);
+            return StorageService.loadConfigs()
+                .then(function (config) {
+                    return  $q.all([
+                        RedditService.getInboxMessages({ limit: config.messageCount }),
+                        RedditService.getSentMessages({ limit: config.messageCount })
+                    ]);
+                })
+                .then(processMessages);
         },
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()

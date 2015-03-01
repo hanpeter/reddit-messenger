@@ -40,7 +40,7 @@
     <body class="container" ng-controller="AppController">
         <div class="content" ng-cloak>
             <div class="col-sm-12 menu clearfix">
-                <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#optionsModal">
+                <button type="button" class="btn btn-default pull-right" ng-click="openOptionModal()">
                     <span class="glyphicon glyphicon-cog"></span>
                     <span class="button-text">Options</span>
                 </button>
@@ -126,56 +126,6 @@
                 </div>
             </div>
         </div>
-        <div id="optionsModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" ng-controller="OptionController">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Options</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form class="optionForm" role="form">
-                            <div class="form-group">
-                                <label for="refreshInterval" class="control-label">
-                                    Refresh Interval
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <input type="checkbox" ng-click="toggleRefreshInterval()" ng-checked="refreshInterval > 0" />
-                                    </span>
-                                    <input type="number" id="refreshInterval" class="form-control" min="2" step="1" ng-model="refreshInterval" ng-blur="updateConfig()" ng-disabled="refreshInterval < 1" />
-                                    <span class="input-group-addon">seconds</span>
-                                </div>
-                                <span class="help-block" ng-show="refreshInterval > 0">The messenger will refresh the whole message set every {{refreshInterval}} seconds.</span>
-                                <span class="help-block" ng-show="refreshInterval < 1">The messenger will not refresh the whole message set.</span>
-                            </div>
-                            <div class="form-group">
-                                <label for="checkInterval" class="control-label">
-                                    Unread Check Interval
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-addon">
-                                        <input type="checkbox" ng-click="toggleCheckInterval()" ng-checked="checkInterval > 0" />
-                                    </span>
-                                    <input type="number" id="checkInterval" class="form-control" min="2" step="1" ng-model="checkInterval" ng-blur="updateConfig()" ng-disabled="checkInterval < 1" />
-                                    <span class="input-group-addon">seconds</span>
-                                </div>
-                                <span class="help-block" ng-show="checkInterval > 0">The messenger will check for unread messages every {{checkInterval}} seconds.</span>
-                                <span class="help-block" ng-show="checkInterval < 1">The messenger will not check for unread messages.</span>
-                            </div>
-                            <div class="form-group">
-                                <label for="messageCount" class="control-label">
-                                    Fetch Message Count
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" id="messageCount" class="form-control" min="25" max="100" step="1" ng-model="messageCount" ng-blur="updateConfig()" />
-                                    <span class="input-group-addon">messages</span>
-                                </div>
-                                <span class="help-block">Each refresh and check will grab {{messageCount}} messages.</span>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div ng-include="'/templates/options.html'" ng-controller="OptionController"></div>
     </body>
 </html>

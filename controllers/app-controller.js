@@ -1,28 +1,35 @@
 App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactoryService', 'NotificationService', 'StorageService',
     function ($scope, $q, RedditService, ThreadFactoryService, NotificationService, StorageService) {
-        var config = null;
         var checkTimeoutID = null;
         var refreshTimeoutID = null;
 
         function checkUnreadMessages() {
-            $scope.sync(function () {
-                ThreadFactoryService.checkUnreadMessages()
-                    .then(NotificationService.update);
-            });
+            StorageService.loadConfigs()
+                .then(function (config) {
+                    clearTimeout(checkTimeoutID);
 
-            if (config.checkInterval > 0) {
-                clearTimeout(checkTimeoutID);
-                checkTimeoutID = setTimeout(checkUnreadMessages, config.checkInterval * 1000);
-            }
+                    if (config.option.unread.isEnabled) {
+                        $scope.sync(function () {
+                            ThreadFactoryService.checkUnreadMessages()
+                                .then(NotificationService.update);
+                        });
+
+                        checkTimeoutID = setTimeout(checkUnreadMessages, config.option.unread.interval * 1000);
+                    }
+                });
         }
 
         function autoRefreshMessages() {
-            $scope.updateMessages();
+            StorageService.loadConfigs()
+                .then(function (config) {
+                    clearTimeout(refreshTimeoutID);
 
-            if (config.refreshInterval > 0) {
-                clearTimeout(refreshTimeoutID);
-                refreshTimeoutID = setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
-            }
+                    if (config.option.refresh.isEnabled) {
+                        $scope.updateMessages();
+
+                        refreshTimeoutID = setTimeout(autoRefreshMessages, config.option.refresh.interval * 1000);
+                    }
+                });
         }
 
         _.extend($scope, {
@@ -52,24 +59,27 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
                 ThreadFactoryService.getMoreMessages();
             },
             resetTimeout: function () {
-                if (config.checkInterval > 0) {
-                    clearTimeout(checkTimeoutID);
-                    checkTimeoutID = setTimeout(checkUnreadMessages, config.checkInterval * 1000);
-                }
-                if (config.refreshInterval > 0) {
-                    clearTimeout(refreshTimeoutID);
-                    refreshTimeoutID = setTimeout(autoRefreshMessages, config.refreshInterval * 1000);
-                }
+                StorageService.loadConfigs()
+                    .then(function (config) {
+                        clearTimeout(checkTimeoutID);
+                        clearTimeout(refreshTimeoutID);
+
+                        if (config.option.unread.isEnabled) {
+                            checkTimeoutID = setTimeout(checkUnreadMessages, config.option.unread.interval * 1000);
+                        }
+                        if (config.option.refresh.isEnabled) {
+                            refreshTimeoutID = setTimeout(autoRefreshMessages, config.option.refresh.interval * 1000);
+                        }
+                    });
+            },
+            openOptionModal: function () {
+                $('#optionsModal').modal();
             }
         });
 
-        $q.all([
-            StorageService.loadConfigs(),
-            RedditService.getUserInfo()
-        ]).then(function (resps) {
-            config = resps[0];
-
-            autoRefreshMessages();
-            checkUnreadMessages();
-        });
+        RedditService.getUserInfo()
+            .then(function () {
+                autoRefreshMessages();
+                checkUnreadMessages();
+            });
     }]);
