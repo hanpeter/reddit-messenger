@@ -37,42 +37,42 @@
             
         </style>
     </head>
-    <body class="container" ng-controller="AppController">
+    <body class="container-fluid" ng-controller="AppController">
         <div class="content" ng-cloak>
-            <div class="col-sm-12 menu clearfix">
-                <button type="button" class="btn btn-default pull-right" ng-click="openOptionModal()">
-                    <span class="glyphicon glyphicon-cog"></span>
-                    <span class="button-text">Options</span>
-                </button>
-                <button type="button" class="btn btn-default pull-right" ng-click="updateMessages()">
-                    <span class="glyphicon glyphicon-refresh"></span>
-                    <span class="button-text">Refresh</span>
-                </button>
-                <button type="button" class="btn btn-default pull-right" ng-click="moreMessages()">
-                    <span class="glyphicon glyphicon-download"></span>
-                    <span class="button-text">More messages</span>
-                </button>
+            <div id="menu" class="clearfix">
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default" ng-click="moreMessages()">
+                        <span class="glyphicon glyphicon-download"></span>
+                        <span class="button-text">More messages</span>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="updateMessages()">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                        <span class="button-text">Refresh</span>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="openOptionModal()">
+                        <span class="glyphicon glyphicon-cog"></span>
+                        <span class="button-text">Options</span>
+                    </button>
+                </div>
             </div>
-            <div class="col-sm-3">
-                <ul class="nav nav-pills nav-stacked threads">
-                    <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
-                        <a href="" ng-click="setActiveThread(thread)">
-                            <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
-                            <h4>{{thread.subject}}</h4>
-                            with {{thread.dest}}
-                        </a>
-                    </li>
-                    <li ng-class="{ active: isComposing }">
-                        <a hg-href="" ng-click="startNewThread()">
-                            <h4>Compose</h4>
-                            with a new user
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-sm-9">
+            <ul id="threads" class="nav nav-pills nav-stacked">
+                <li ng-repeat="thread in messages" ng-class="{ active: activeThread === thread }">
+                    <a href="" ng-click="setActiveThread(thread)">
+                        <span class="badge pull-right" ng-show="thread.unreadCount > -1">{{thread.unreadCount}}</span>
+                        <h4>{{thread.subject}}</h4>
+                        with {{thread.dest}}
+                    </a>
+                </li>
+                <li ng-class="{ active: isComposing }">
+                    <a href="" ng-click="startNewThread()">
+                        <h4>Compose</h4>
+                        with a new user
+                    </a>
+                </li>
+            </ul>
+            <div class="col-sm-9 col-sm-offset-3">
                 <div class="messages" ng-controller="MessageController" ng-hide="isComposing">
-                    <form class="reply-form" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="($event.keyCode === 10 || ($event.keyCode === 13 && $event.ctrlKey)) && reply()">
+                    <form id="replyForm" role="form" ng-show="!!activeThread" ng-submit="reply()" ng-keypress="($event.keyCode === 10 || ($event.keyCode === 13 && $event.ctrlKey)) && reply()">
                         <div class="form-group">
                             <textarea class="form-control" rows="3" ng-model="activeThread.replyMsg"></textarea>
                         </div>

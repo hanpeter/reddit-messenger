@@ -10,40 +10,29 @@ html {
     display: none;
 }
 
-.reply-form,
+#replyForm,
 .compose-form,
-.menu {
+#menu {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.menu > .btn {
-    margin-left: 5px;
-    margin-right: 5px;
-}
-.menu > .btn:first-child {
-    margin-right: 0;
-}
-
-.modal {
-    overflow-y: auto;
-}
-
-.compose-form #captchaImg {
-    border: 1px solid #737373;
-    padding: 3px;
+#threads,
+#menu {
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 @media (min-width: 768px) {
-    .threads {
+    #threads {
         position: fixed;
         top: 10px;
         bottom: 10px;
-        width: 150px;
+        width: 25%;
         overflow-y: auto;
         overflow-x: hidden;
     }
-    ul.threads > li {
+    #threads > li {
         margin-right: 10px;
     }
 
@@ -51,24 +40,28 @@ html {
         display: inline;
     }
 
-    .menu {
+    #menu {
         margin-bottom: 0;
     }
 }
 
-@media (min-width: 992px) {
-    .threads {
-        width: 200px;
-    }
+/* Menu bar */
+#menu .btn {
+    margin-left: 5px;
 }
 
-@media (min-width: 1200px) {
-    .threads {
-        width: 250px;
-    }
+/* Options modal */
+#optionsModal {
+    overflow-y: auto;
 }
 
 #optionsModal .tab-content .form-horizontal .form-group {
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Compose form */
+.compose-form #captchaImg {
+    border: 1px solid #737373;
+    padding: 3px;
 }
