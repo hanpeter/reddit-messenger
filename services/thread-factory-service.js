@@ -97,8 +97,8 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
             return StorageService.loadConfigs()
                 .then(function (config) {
                     return  $q.all([
-                        RedditService.getInboxMessages({ limit: config.messageCount }),
-                        RedditService.getSentMessages({ limit: config.messageCount })
+                        RedditService.getInboxMessages({ limit: config.option.refresh.messageCount }),
+                        RedditService.getSentMessages({ limit: config.option.refresh.messageCount })
                     ]);
                 })
                 .then(processMessages);
@@ -116,8 +116,8 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
         getMoreMessages: function () {
             return StorageService.loadConfigs().then(function (config) {
                 return $q.all([
-                    RedditService.getInboxMessages({ limit: config.messageCount, after: lastMessages.inbox }),
-                    RedditService.getSentMessages({ limit: config.messageCount, after: lastMessages.sent })
+                    RedditService.getInboxMessages({ limit: config.option.refresh.messageCount, after: lastMessages.inbox }),
+                    RedditService.getSentMessages({ limit: config.option.refresh.messageCount, after: lastMessages.sent })
                 ]);
             })
             .then(processMessages);

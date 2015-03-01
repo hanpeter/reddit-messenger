@@ -73,7 +73,7 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
                     });
             },
             openOptionModal: function () {
-                $('#optionsModal').modal();
+                $scope.$broadcast('openOptionModal');
             }
         });
 

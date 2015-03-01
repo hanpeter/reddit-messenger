@@ -1,5 +1,6 @@
 App.controller('OptionController', ['$scope', 'StorageService', function ($scope, StorageService) {
     _.extend($scope, {
+        forms: {},
         unread: {
             isEnabled: true,
             interval: 5,
@@ -25,28 +26,50 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
             }
         },
         updateConfig: function () {
-            StorageService.saveConfigs({
-                option: {
-                    unread: {
-                        isEnabled: $scope.unread.isEnabled,
-                        interval: $scope.unread.interval
-                    },
-                    refresh: {
-                        isEnabled: $scope.refresh.isEnabled,
-                        interval: $scope.refresh.interval,
-                        messageCount: $scope.refresh.messageCount
+            if (_.every(_.values($scope.forms), function (form) { return form.$valid; })) {
+                StorageService.saveConfigs({
+                    option: {
+                        unread: {
+                            isEnabled: $scope.unread.isEnabled,
+                            interval: $scope.unread.interval
+                        },
+                        refresh: {
+                            isEnabled: $scope.refresh.isEnabled,
+                            interval: $scope.refresh.interval,
+                            messageCount: $scope.refresh.messageCount
+                        }
                     }
-                }
-            }).then(function () {
-                $scope.sync(function () {
-                    $scope.resetTimeout();
+                }).then(function () {
+                    $scope.sync(function () {
+                        $scope.resetTimeout();
+                    });
                 });
+            }
+        },
+        showModal: function () {
+            $('#optionsModal').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
             });
+        },
+        hideModal: function () {
+            if (_.every(_.values($scope.forms), function (form) { return form.$valid; })) {
+                $('#optionsModal').modal('hide');
+            }
         }
     });
 
     StorageService.loadConfigs().then(function (config) {
         $scope.refresh = _.extend($scope.refresh, config.option.refresh);
         $scope.unread = _.extend($scope.unread, config.option.unread);
+    });
+
+    $scope.$on('openOptionModal', function () {
+        $scope.showModal();
+    });
+
+    $scope.$watch('$unreadForm', function () {
+        console.log(arguments);
     });
 }]);
