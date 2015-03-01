@@ -55,9 +55,32 @@ html {
     overflow-y: auto;
 }
 
+#optionsModal .nav-tabs {
+    margin-bottom: 15px;
+}
+
+#optionsModal .nav-tabs > li.active.has-error > a,
+#optionsModal .nav-tabs > li.active.has-error > a:hover,
+#optionsModal .nav-tabs > li.active.has-error > a:focus {
+    color: #A94442;
+    border-color: #A94442;
+    border-bottom-color: transparent;
+}
+
+#optionsModal .nav-tabs > li.has-error > a,
+#optionsModal .nav-tabs > li.has-error > a:hover,
+#optionsModal .nav-tabs > li.has-error > a:focus {
+    color: #A94442;
+}
+
 #optionsModal .tab-content .form-horizontal .form-group {
     margin-left: auto;
     margin-right: auto;
+}
+
+#optionsModal .tab-content .form-horizontal .form-group .input-group {
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 /* Compose form */

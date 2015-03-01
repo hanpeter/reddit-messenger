@@ -6,11 +6,15 @@
                 <h4 class="modal-title">Options</h4>
             </div>
             <div class="modal-body" role="tabpanel">
+                <div class="alert alert-danger" ng-show="!isValid() && displayAlert">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    Please fix the errors below before.
+                </div>
                 <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active">
+                    <li role="presentation" class="active" ng-class="{ 'has-error': forms.unreadForm.$invalid }">
                         <a href="#unread" aria-controls="unread" role="tab" data-toggle="tab">Unread Messages</a>
                     </li>
-                    <li role="presentation">
+                    <li role="presentation" ng-class="{ 'has-error': forms.refreshForm.$invalid }">
                         <a href="#refresh" aria-controls="refresh" role="tab" data-toggle="tab">Refresh Messages</a>
                     </li>
                     <!-- <li role="presentation">
@@ -38,10 +42,11 @@
                                     Interval
                                 </label>
                                 <div class="col-sm-6 input-group">
-                                    <input type="number" id="unreadInterval" name="unreadInterval" class="form-control" min="2" step="1" ng-model="unread.interval" ng-blur="updateConfig()" ng-required="unread.isEnabled" />
+                                    <input type="number" id="unreadInterval" name="unreadInterval" class="form-control" min="2" step="1" ng-model="unread.interval" ng-required="unread.isEnabled" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
                                 <span class="help-block" ng-show="forms.unreadForm.unreadInterval.$valid">The messenger will check for unread messages every {{unread.interval}} seconds.</span>
+                                <span class="help-block" ng-show="forms.unreadForm.unreadInterval.$error.min">Please enter a number greater than 2.</span>
                             </div>
                         </form>
                     </div>
@@ -62,20 +67,22 @@
                                     Interval
                                 </label>
                                 <div class="col-sm-6 input-group">
-                                    <input type="number" id="refreshInterval" name="refreshInterval" class="form-control" min="2" step="1" ng-model="refresh.interval" ng-blur="updateConfig()" ng-required="refresh.isEnabled" />
+                                    <input type="number" id="refreshInterval" name="refreshInterval" class="form-control" min="2" step="1" ng-model="refresh.interval" ng-required="refresh.isEnabled" />
                                     <span class="input-group-addon">seconds</span>
                                 </div>
                                 <span class="help-block" ng-show="forms.refreshForm.refreshInterval.$valid">The messenger will refresh the whole message set every {{refresh.interval}} seconds.</span>
+                                <span class="help-block" ng-show="forms.refreshForm.refreshInterval.$error.min">Please enter a number greater than 2.</span>
                             </div>
                             <div class="form-group" ng-class="{ 'has-error': forms.refreshForm.messageCount.$invalid }" ng-show="refresh.isEnabled">
                                 <label for="messageCount" class="control-label col-sm-6">
                                     Message Count
                                 </label>
                                 <div class="col-sm-6 input-group">
-                                    <input type="number" id="messageCount" name="messageCount" class="form-control" min="25" max="100" step="1" ng-model="refresh.messageCount" ng-blur="updateConfig()" ng-required="refresh.isEnabled" />
+                                    <input type="number" id="messageCount" name="messageCount" class="form-control" min="25" max="100" step="1" ng-model="refresh.messageCount" ng-required="refresh.isEnabled" />
                                     <span class="input-group-addon">messages</span>
                                 </div>
                                 <span class="help-block" ng-show="forms.refreshForm.messageCount.$valid">Each refresh and check will grab {{refresh.messageCount}} messages.</span>
+                                <span class="help-block" ng-show="forms.refreshForm.messageCount.$error.min || forms.refreshForm.messageCount.$error.max">Please enter a number between 25 and 100.</span>
                             </div>
                         </form>
                     </div>
@@ -83,6 +90,10 @@
                         <form action="" role="form"></form>
                     </div> -->
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" ng-click="cancel()">Cancel</button>
+                <button class="btn btn-success" type="button" ng-click="updateConfig()">Save</button>
             </div>
         </div>
     </div>
