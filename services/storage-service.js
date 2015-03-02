@@ -9,6 +9,11 @@ App.service('StorageService', ['$q', function ($q) {
                         isEnabled: true,
                         interval: 30,
                         messageCount: 100
+                    },
+                    notification: {
+                        isContinuous: true,
+                        interval: 15,
+                        snooze: 300
                     }
                 },
                 winWidth: 800,
@@ -18,40 +23,37 @@ App.service('StorageService', ['$q', function ($q) {
 
         _.extend(this, {
             loadConfigs: function () {
-                var deferred = loadingDeferred;
-                if (!deferred) {
-                    deferred = $q.defer();
+                loadingDeferred = $q.defer();
 
-                    chrome.storage.sync.get(_.keys(config), function (data) {
-                        if (chrome.runtime.lastError) {
-                            deferred.reject(chrome.runtime.lastError);
-                            deferred = null;
+                chrome.storage.sync.get(_.keys(config), function (data) {
+                    if (chrome.runtime.lastError) {
+                        loadingDeferred.reject(chrome.runtime.lastError);
+                        loadingDeferred = null;
+                    }
+                    else {
+                        _.extend(config, data);
+
+                        // Handle old style config
+                        if (!!data.refreshInterval) {
+                            config.option.refresh.isEnabled = data.refreshInterval > 0;
+                            config.option.refresh.interval = data.refreshInterval || 30;
+                            delete config.refreshInterval;
                         }
-                        else {
-                            _.extend(config, data);
-
-                            // Handle old style config
-                            if (!!data.refreshInterval) {
-                                config.option.refresh.isEnabled = data.refreshInterval > 0;
-                                config.option.refresh.interval = data.refreshInterval || 30;
-                                delete config.refreshInterval;
-                            }
-                            if (!!data.messageCount) {
-                                config.option.refresh.messageCount = data.messageCount || 100;
-                                delete config.messageCount;
-                            }
-                            if (!!data.checkInterval) {
-                                config.option.unread.isEnabled = data.checkInterval > 0;
-                                config.option.unread.interval = data.checkInterval || 5;
-                                delete config.checkInterval;
-                            }
-
-                            deferred.resolve(config);
+                        if (!!data.messageCount) {
+                            config.option.refresh.messageCount = data.messageCount || 100;
+                            delete config.messageCount;
                         }
-                    });
-                }
+                        if (!!data.checkInterval) {
+                            config.option.unread.isEnabled = data.checkInterval > 0;
+                            config.option.unread.interval = data.checkInterval || 5;
+                            delete config.checkInterval;
+                        }
 
-                return deferred.promise;
+                        loadingDeferred.resolve(config);
+                    }
+                });
+
+                return loadingDeferred.promise;
             },
             saveConfigs: function (newConfig) {
                 var deferred = $q.defer();

@@ -16,10 +16,10 @@
                     <li role="presentation" ng-class="{ 'has-error': forms.refreshForm.$invalid }">
                         <a href="#refresh" aria-controls="refresh" role="tab" data-toggle="tab">Refresh Messages</a>
                     </li>
-                    <!-- <li role="presentation">
+                    <li role="presentation">
                         <a href="#notification" aria-controls="notification" role="tab" data-toggle="tab">Notifications</a>
                     </li>
-                    <li role="presentation">
+                    <!-- <li role="presentation">
                         <a href="#save" aria-controls="save" role="tab" data-toggle="tab">Save Config</a>
                     </li> -->
                 </ul>
@@ -31,8 +31,8 @@
                                     Check for Unread Messages
                                 </label>
                                 <div class="col-sm-6 btn-group">
-                                    <button class="btn btn-default" type="button" ng-class="{ active: !unread.isEnabled }" ng-click="unread.modifyEnabled(false)">Disabled</button>
-                                    <button class="btn btn-default" type="button" ng-class="{ active: unread.isEnabled }" ng-click="unread.modifyEnabled(true)">Enabled</button>
+                                    <button type="button" class="btn btn-default" ng-class="{ active: !unread.isEnabled }" ng-click="unread.modifyEnabled(false)">Disabled</button>
+                                    <button type="button" class="btn btn-default" ng-class="{ active: unread.isEnabled }" ng-click="unread.modifyEnabled(true)">Enabled</button>
                                 </div>
                                 <span class="help-block" ng-show="!unread.isEnabled">The messenger will not check for unread messages.</span>
                             </div>
@@ -56,8 +56,8 @@
                                     Refresh the Messages
                                 </label>
                                 <div class="col-sm-6 btn-group">
-                                    <button class="btn btn-default" type="button" ng-class="{ active: !refresh.isEnabled }" ng-click="refresh.modifyEnabled(false)">Disabled</button>
-                                    <button class="btn btn-default" type="button" ng-class="{ active: refresh.isEnabled }" ng-click="refresh.modifyEnabled(true)">Enabled</button>
+                                    <button type="button" class="btn btn-default" ng-class="{ active: !refresh.isEnabled }" ng-click="refresh.modifyEnabled(false)">Disabled</button>
+                                    <button type="button" class="btn btn-default" ng-class="{ active: refresh.isEnabled }" ng-click="refresh.modifyEnabled(true)">Enabled</button>
                                 </div>
                                 <span class="help-block" ng-show="!refresh.isEnabled">The messenger will not refresh the whole message set.</span>
                             </div>
@@ -85,14 +85,44 @@
                             </div>
                         </form>
                     </div>
-                    <!-- <div id="notification" class="tab-pane" role="tabpanel">
-                        <form action="" role="form"></form>
-                    </div> -->
+                    <div id="notification" class="tab-pane" role="tabpanel">
+                        <form name="forms.notificationForm" class="form-horizontal" role="form">
+                            <!-- <div class="form-group">
+                                <label class="control-label col-sm-6">
+                                    Unread message notification
+                                </label>
+                                <div class="col-sm-6 btn-group">
+                                    <button type="button" class="btn btn-default" ng-class="{ active: !notification.isContinuous }" ng-click="notification.modifyContinuous(false)">Once</button>
+                                    <button type="button" class="btn btn-default" ng-class="{ active: notification.isContinuous }" ng-click="notification.modifyContinuous(true)">Cotinuously</button>
+                                </div>
+                            </div> -->
+                            <div class="form-group" ng-class="{ 'has-error': forms.notificationForm.notificationInterval.$invalid }" ng-show="notification.isContinuous">
+                                <label for="notificationInterval" class="control-label col-sm-6">
+                                    Interval
+                                </label>
+                                <div class="col-sm-6 input-group">
+                                    <input type="number" id="notificationInterval" name="notificationInterval" class="form-control" min="1" ng-model="notification.interval" ng-required="notification.isContinuous" />
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                                <span class="help-block" ng-show="forms.notificationForm.notificationInterval.$valid">The messenger will notify you unread messages every {{notification.interval}} seconds.</span>
+                            </div>
+                            <div class="form-group" ng-class="{ 'has-error': forms.notificationForm.notificationSnooze.$invalid }">
+                                <label for="notificationSnooze" class="control-label col-sm-6">
+                                    Snooze
+                                </label>
+                                <div class="col-sm-6 input-group">
+                                    <input type="number" id="notificationSnooze" name="notificationSnooze" class="form-control" ng-model="notification.snooze" required />
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                                <span class="help-block" ng-show="forms.notificationForm.notificationSnooze.$valid">Clicking on the notification will stop notifications for {{notification.snooze}} seconds.</span>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-default" type="button" ng-click="cancel()">Cancel</button>
-                <button class="btn btn-success" type="button" ng-click="updateConfig()">Save</button>
+                <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="updateConfig()">Save</button>
             </div>
         </div>
     </div>

@@ -1,12 +1,13 @@
-App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', function ($timeout, $q, RedditConfig) {
-    var me = this,
-        NOTIFICATION_BUFFER = 15000,
-        NOTIFICATION_SNOOZE = 300000;
+App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', 'StorageService', function ($timeout, $q, RedditConfig, StorageService) {
+    var me = this;
 
     chrome.notifications.onClicked.addListener(function (nID) {
-        if (nID === me.notificationID) {
-            me.notificationRefreshTime = moment().add(NOTIFICATION_SNOOZE, 'ms');
-        }
+        StorageService.loadConfigs()
+            .then(function (config) {
+                if (nID === me.notificationID) {
+                    me.notificationRefreshTime = moment().add(config.option.notification.snooze, 's');
+                }
+            });
     });
 
     _.extend(me, {
@@ -15,7 +16,7 @@ App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', function (
         clear: function () {
             var deferred = $q.defer();
 
-            if (moment().isAfter(me.notificationRefreshTime) && !!me.notificationID) {
+            if (moment().diff(me.notificationRefreshTime, 'seconds') >= 0 && !!me.notificationID) {
                 chrome.notifications.clear(me.notificationID, function (wasCleared) {
                     if (wasCleared) {
                         me.notificationID = '';
@@ -39,28 +40,30 @@ App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', function (
                 title: "Unread message(s) for " + RedditConfig.username
             };
 
-            return me.clear().then(function() {
-                $timeout(function () {
-                    if (count > 0) {
-                        _.extend(config, {
-                            message: "There is " + count + " unread messages."
-                        });
-
-                        if (!me.notificationID) {
-                            chrome.notifications.create('', config, function (nID) {
-                                me.notificationID = nID;
-
-                                new Audio('/assets/notification.mp3').play();
-
-                                me.notificationRefreshTime = moment().add(NOTIFICATION_BUFFER, 'ms');
+            me.clear()
+                .then(StorageService.loadConfigs)
+                .then(function (c) {
+                    $timeout(function () {
+                        if (count > 0) {
+                            _.extend(config, {
+                                message: "There is " + count + " unread messages."
                             });
+
+                            if (!me.notificationID) {
+                                chrome.notifications.create('', config, function (nID) {
+                                    me.notificationID = nID;
+
+                                    new Audio('/assets/notification.mp3').play();
+
+                                    me.notificationRefreshTime = moment().add(c.option.notification.interval, 's');
+                                });
+                            }
+                            else {
+                                chrome.notifications.update(me.notificationID, config, $.noop);
+                            }
                         }
-                        else {
-                            chrome.notifications.update(me.notificationID, config, $.noop);
-                        }
-                    }
+                    });
                 });
-            });
         }
     });
 }]);

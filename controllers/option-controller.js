@@ -3,6 +3,7 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
         StorageService.loadConfigs().then(function (config) {
             $scope.refresh = _.extend($scope.refresh, config.option.refresh);
             $scope.unread = _.extend($scope.unread, config.option.unread);
+            $scope.notification = _.extend($scope.notification, config.option.notification);
         });
     }
 
@@ -30,6 +31,17 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
                 $scope.refresh.isEnabled = value;
             }
         },
+        notification: {
+            isContinuous: true,
+            interval: 15,
+            snooze: 300,
+            modifyContinuous: function (value) {
+                if (!value) {
+                    $scope.notification.interval = 15;
+                }
+                $scope.notification.isContinuous = value;
+            }
+        },
         updateConfig: function () {
             if ($scope.isValid()) {
                 StorageService.saveConfigs({
@@ -42,6 +54,11 @@ App.controller('OptionController', ['$scope', 'StorageService', function ($scope
                             isEnabled: $scope.refresh.isEnabled,
                             interval: $scope.refresh.interval,
                             messageCount: $scope.refresh.messageCount
+                        },
+                        notification: {
+                            isContinuous: $scope.notification.isContinuous,
+                            interval: $scope.notification.interval,
+                            snooze: $scope.notification.snooze
                         }
                     }
                 }).then(function () {
