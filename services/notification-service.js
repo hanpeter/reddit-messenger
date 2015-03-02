@@ -1,7 +1,7 @@
 App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', function ($timeout, $q, $sce, StorageService) {
     var me = this;
     var notificationIDs = [];
-    var ignoreList = [];
+    var displayedMessages = [];
     var notificationRefreshTime = moment();
     var notificationTemplate = {
             type: 'basic',
@@ -13,9 +13,7 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
     chrome.notifications.onClicked.addListener(function (nID) {
         StorageService.loadConfigs()
             .then(function (config) {
-                if (nID === me.notificationID) {
-                    notificationRefreshTime = moment().add(config.option.notification.snooze, 's');
-                }
+                notificationRefreshTime = moment().add(config.option.notification.snooze, 's');
             });
     });
 
@@ -48,6 +46,20 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
         return deferred.promise;
     }
 
+    function updateNotification(msg) {
+        var promise = $q.when();
+
+        if (notificationIDs.indexOf(msg.id) >= 0) {
+            promise = promise.then(function () {
+                return clearNotificaton(msg.id);
+            });
+        }
+
+        return promise.then(function () {
+            return createNotification(msg);
+        });
+    }
+
     function timeout() {
         var deferred = $q.defer();
 
@@ -59,27 +71,30 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
     }
 
     _.extend(me, {
-        clear: function () {
-            return $q.all(
-                _.map(notificationIDs, function (notificationID) { return clearNotificaton(notificationID); })
-            );
-        },
         update: function (msgs) {
             if (moment().diff(notificationRefreshTime, 'seconds') >= 0) {
-                me.clear()
-                    .then(timeout)
+                timeout()
                     .then(StorageService.loadConfigs)
                     .then(function (c) {
-                        $q.all(
-                            _.map(msgs, function (msg) { return createNotification(msg); })
-                        ).then(function (ids) {
-                            notificationIDs = ids;
+                        var newMsgs = _.filter(msgs, function (msg) { return displayedMessages.indexOf(msg.id) < 0; });
 
-                            if (notificationIDs.length > 0) {
+                        $q.all(
+                            _.map(newMsgs, function (msg) { return updateNotification(msg); })
+                        ).then(function (ids) {
+                            if (ids.length > 0) {
                                 notificationAudio.play();
-                                me.notificationRefreshTime = moment().add(c.option.notification.interval, 's');
+
+                                if (c.option.notification.isContinuous) {
+                                    notificationRefreshTime = moment().add(c.option.notification.interval, 's');
+                                }
                             }
+
+                            notificationIDs = _.uniq(notificationIDs.concat(ids));
                         });
+
+                        if (!c.option.notification.isContinuous) {
+                            displayedMessages = _.pluck(msgs, 'id');
+                        }
                     });
             }
         }
