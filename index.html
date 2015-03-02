@@ -86,7 +86,7 @@
                     <div class="media" ng-repeat="msg in activeThread.messages">
                         <div class="media-body" ng-class="{ 'bg-primary': msg.isUnread && msg.isReceived, 'bg-info': !msg.isUnread && msg.isReceived }" ng-click="markAsRead(msg)">
                             <h4 class="media-heading"><small>{{displayDate(msg.createDate)}}</small></h4>
-                            <div ng-bind-html="msg.body"></div>
+                            <div ng-bind-html="msg.bodyHtml"></div>
                         </div>
                     </div>
                 </div>

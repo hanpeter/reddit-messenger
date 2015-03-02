@@ -53,7 +53,6 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
             return me.threads;
         },
         saveMessage: function (message) {
-            var bodyHtml = $('<textarea/>').html(message.body_html).text();
             var thread = _.find(me.threads, function (thread) {
                     return !!message.first_message_name ? thread.threadID === message.first_message_name : thread.threadID === message.name;
                 });
@@ -84,7 +83,8 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
                 msg = {
                     id: message.name,
                     author: message.author,
-                    body: $sce.trustAsHtml(bodyHtml),
+                    bodyHtml: $sce.trustAsHtml($('<textarea/>').html(message.body_html).text()),
+                    bodyText: message.body,
                     createDate: moment(message.created_utc * 1000),
                     isUnread: message.new,
                     isReceived: message.dest === RedditConfig.username
@@ -92,6 +92,8 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
                 thread.unreadCount += (msg.isUnread) ? 1 : 0;
                 thread.messages.unshift(msg);
             }
+
+            return msg;
         },
         updateThreads: function () {
             return StorageService.loadConfigs()
@@ -106,11 +108,12 @@ App.service('ThreadFactoryService', ['$sce', '$q', 'RedditService', 'RedditConfi
         checkUnreadMessages: function () {
             return RedditService.getUnreadMessages()
                 .then(function (data) {
+                    var msgs = [];
                     _.each(_.pluck(data.children, 'data'), function (value) {
-                        me.saveMessage(value);
+                        msgs.push(me.saveMessage(value));
                     });
 
-                    return data.children.length;
+                    return msgs;
                 });
         },
         getMoreMessages: function () {

@@ -1,69 +1,87 @@
-App.service('NotificationService', ['$timeout', '$q', 'RedditConfig', 'StorageService', function ($timeout, $q, RedditConfig, StorageService) {
+App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', function ($timeout, $q, $sce, StorageService) {
     var me = this;
+    var notificationIDs = [];
+    var ignoreList = [];
+    var notificationRefreshTime = moment();
+    var notificationTemplate = {
+            type: 'basic',
+            iconUrl: '/assets/icon_128.png',
+            isClickable: true
+        };
+    var notificationAudio = new Audio('/assets/notification.mp3');
 
     chrome.notifications.onClicked.addListener(function (nID) {
         StorageService.loadConfigs()
             .then(function (config) {
                 if (nID === me.notificationID) {
-                    me.notificationRefreshTime = moment().add(config.option.notification.snooze, 's');
+                    notificationRefreshTime = moment().add(config.option.notification.snooze, 's');
                 }
             });
     });
 
-    _.extend(me, {
-        notificationID: '',
-        notificationRefreshTime: moment(),
-        clear: function () {
-            var deferred = $q.defer();
+    function clearNotificaton(notificationID) {
+        var deferred = $q.defer();
 
-            if (moment().diff(me.notificationRefreshTime, 'seconds') >= 0 && !!me.notificationID) {
-                chrome.notifications.clear(me.notificationID, function (wasCleared) {
-                    if (wasCleared) {
-                        me.notificationID = '';
-                        deferred.resolve();
-                    }
-                    else {
-                        deferred.reject();
-                    }
-                });
-            }
-            else {
+        chrome.notifications.clear(notificationID, function (wasCleared) {
+            if (wasCleared) {
                 deferred.resolve();
             }
+            else {
+                deferred.reject();
+            }
+        });
 
-            return deferred.promise;
+        return deferred.promise;
+    }
+
+    function createNotification(msg) {
+        var deferred = $q.defer();
+        var config = _.extend(notificationTemplate, {
+                title: 'Unread message from ' + msg.author,
+                message: msg.bodyText
+            });
+
+        chrome.notifications.create(msg.id, config, function (notificationID) {
+            deferred.resolve(notificationID);
+        });
+
+        return deferred.promise;
+    }
+
+    function timeout() {
+        var deferred = $q.defer();
+
+        $timeout(function () {
+            deferred.resolve();
+        });
+
+        return deferred.promise;
+    }
+
+    _.extend(me, {
+        clear: function () {
+            return $q.all(
+                _.map(notificationIDs, function (notificationID) { return clearNotificaton(notificationID); })
+            );
         },
-        update: function (count) {
-            var config = {
-                type: "basic",
-                iconUrl: "/assets/icon_128.png",
-                title: "Unread message(s) for " + RedditConfig.username
-            };
+        update: function (msgs) {
+            if (moment().diff(notificationRefreshTime, 'seconds') >= 0) {
+                me.clear()
+                    .then(timeout)
+                    .then(StorageService.loadConfigs)
+                    .then(function (c) {
+                        $q.all(
+                            _.map(msgs, function (msg) { return createNotification(msg); })
+                        ).then(function (ids) {
+                            notificationIDs = ids;
 
-            me.clear()
-                .then(StorageService.loadConfigs)
-                .then(function (c) {
-                    $timeout(function () {
-                        if (count > 0) {
-                            _.extend(config, {
-                                message: "There is " + count + " unread messages."
-                            });
-
-                            if (!me.notificationID) {
-                                chrome.notifications.create('', config, function (nID) {
-                                    me.notificationID = nID;
-
-                                    new Audio('/assets/notification.mp3').play();
-
-                                    me.notificationRefreshTime = moment().add(c.option.notification.interval, 's');
-                                });
+                            if (notificationIDs.length > 0) {
+                                notificationAudio.play();
+                                me.notificationRefreshTime = moment().add(c.option.notification.interval, 's');
                             }
-                            else {
-                                chrome.notifications.update(me.notificationID, config, $.noop);
-                            }
-                        }
+                        });
                     });
-                });
+            }
         }
     });
 }]);
