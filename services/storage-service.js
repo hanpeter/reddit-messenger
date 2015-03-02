@@ -23,12 +23,11 @@ App.service('StorageService', ['$q', function ($q) {
 
         _.extend(this, {
             loadConfigs: function () {
-                loadingDeferred = $q.defer();
+                var deferred = $q.defer();
 
                 chrome.storage.sync.get(_.keys(config), function (data) {
                     if (chrome.runtime.lastError) {
-                        loadingDeferred.reject(chrome.runtime.lastError);
-                        loadingDeferred = null;
+                        deferred.reject(chrome.runtime.lastError);
                     }
                     else {
                         _.extend(config, data);
@@ -49,11 +48,11 @@ App.service('StorageService', ['$q', function ($q) {
                             delete config.checkInterval;
                         }
 
-                        loadingDeferred.resolve(config);
+                        deferred.resolve(config);
                     }
                 });
 
-                return loadingDeferred.promise;
+                return deferred.promise;
             },
             saveConfigs: function (newConfig) {
                 var deferred = $q.defer();

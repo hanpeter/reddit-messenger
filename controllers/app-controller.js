@@ -79,7 +79,7 @@ App.controller('AppController', ['$scope', '$q', 'RedditService', 'ThreadFactory
 
         RedditService.getUserInfo()
             .then(function () {
-                autoRefreshMessages();
+                $scope.updateMessages();
                 checkUnreadMessages();
             });
     }]);
