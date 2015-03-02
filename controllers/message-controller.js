@@ -1,4 +1,4 @@
-App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactoryService', function ($scope, RedditService, ThreadFactoryService) {
+App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactoryService', 'NotificationService', function ($scope, RedditService, ThreadFactoryService, NotificationService) {
     _.extend($scope, {
         isReplying: false,
         displayDate: function (momentDate) {
@@ -20,7 +20,10 @@ App.controller('MessageController', ['$scope', 'RedditService', 'ThreadFactorySe
             }
 
             if (message.isUnread) {
-                RedditService.markMessageAsRead(message.id);
+                RedditService.markMessageAsRead(message.id)
+                    .then(function () {
+                        NotificationService.clear(message.id);
+                    });
                 message.isUnread = false;
 
                 if ($scope.activeThread.unreadCount > 0) {

@@ -17,21 +17,6 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
             });
     });
 
-    function clearNotificaton(notificationID) {
-        var deferred = $q.defer();
-
-        chrome.notifications.clear(notificationID, function (wasCleared) {
-            if (wasCleared) {
-                deferred.resolve();
-            }
-            else {
-                deferred.reject();
-            }
-        });
-
-        return deferred.promise;
-    }
-
     function createNotification(msg) {
         var deferred = $q.defer();
         var config = _.extend(notificationTemplate, {
@@ -51,7 +36,7 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
 
         if (notificationIDs.indexOf(msg.id) >= 0) {
             promise = promise.then(function () {
-                return clearNotificaton(msg.id);
+                return me.clear(msg.id);
             });
         }
 
@@ -71,6 +56,28 @@ App.service('NotificationService', ['$timeout', '$q', '$sce', 'StorageService', 
     }
 
     _.extend(me, {
+        clear: function (notificationID) {
+            var deferred = $q.defer();
+
+            if (notificationIDs.indexOf(notificationID) >= 0) {
+                chrome.notifications.clear(notificationID, function (wasCleared) {
+                    if (wasCleared) {
+                        deferred.resolve();
+
+                        var index = notificationIDs.indexOf(notificationID);
+                        notificationIDs.splice(index, 1);
+                    }
+                    else {
+                        deferred.reject();
+                    }
+                });
+            }
+            else {
+                deferred.resolve();
+            }
+
+            return deferred.promise;
+        },
         update: function (msgs) {
             if (moment().diff(notificationRefreshTime, 'seconds') >= 0) {
                 timeout()
